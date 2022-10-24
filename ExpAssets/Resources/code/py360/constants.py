@@ -1,0 +1,71 @@
+
+# Constants for pyusb
+PAD_CONFIG = 0
+CTRL_INTERFACE = (0, 0)
+
+# Input packet length/format
+PACKET_BYTES = 20
+PACKET_STRUCT = '<HBBhhhh'
+
+# Valid USB vendor/product IDs and corresponding names
+VALID_IDS = {
+    '1118:654': "Xbox 360 Wired Controller",
+}
+
+# Controller buttons
+BUTTON_UP = 0
+BUTTON_DOWN = 1
+BUTTON_LEFT = 2
+BUTTON_RIGHT = 3
+BUTTON_START = 4
+BUTTON_BACK = 5
+BUTTON_LEFTSTICK = 6
+BUTTON_RIGHTSTICK = 7
+BUTTON_LB = 8
+BUTTON_RB = 9
+BUTTON_XBOX = 10
+BUTTON_NULL = 11 # Bit 11 not actually used
+BUTTON_A = 12
+BUTTON_B = 13
+BUTTON_X = 14
+BUTTON_Y = 15
+
+ALL_BUTTONS = [
+    BUTTON_UP, BUTTON_DOWN, BUTTON_LEFT, BUTTON_RIGHT,
+    BUTTON_START, BUTTON_BACK,
+    BUTTON_LEFTSTICK, BUTTON_RIGHTSTICK,
+    BUTTON_LB, BUTTON_RB,
+    BUTTON_XBOX,
+    BUTTON_A, BUTTON_B, BUTTON_X, BUTTON_Y,
+]
+
+# Controller axes
+AXIS_LT = 0
+AXIS_RT = 1
+AXIS_LEFTX = 2
+AXIS_LEFTY = 3
+AXIS_RIGHTX = 4
+AXIS_RIGHTY = 5
+
+ALL_AXES = [
+    AXIS_LT, AXIS_RT,
+    AXIS_LEFTX, AXIS_LEFTY,
+    AXIS_RIGHTX, AXIS_RIGHTY,
+]
+
+
+# LED Patterns
+LED_OFF = b'\x00'
+LED_BLINK = b'\x01'
+LED_1_FLASH = b'\x02'
+LED_2_FLASH = b'\x03'
+LED_3_FLASH = b'\x04'
+LED_4_FLASH = b'\x05'
+LED_1_ON = b'\x06'
+LED_2_ON = b'\x07'
+LED_3_ON = b'\x08'
+LED_4_ON = b'\x09'
+LED_ROTATING = b'\x0a'
+LED_BLINK_ACTIVE = b'\x0b'
+LED_BLINK_SLOW = b'\x0c'
+LED_ALTERNATE = b'\x0d'

@@ -1,0 +1,18 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+
+[packages]
+klibs = {git = "https://github.com/a-hurst/klibs.git", ref = "c28c6f2d040da0b35f84fde5da0a7c9aacda0107"}
+colorednoise = "*"
+pyusb = "*"
+libusb_package = "*"
+
+[requires]
+python_version = "3.8"
+
+[scripts]
