@@ -71,6 +71,18 @@ CREATE TABLE trials (
 );
 
 
+CREATE TABLE kviq (
+    id integer primary key autoincrement not null,
+    participant_id integer not null references participants(id),
+    movement text not null,
+    vividness integer not null,
+    intensity integer not null,
+    physical_time float not null,
+    visual_time float not null,
+    kinaesthetic_time float not null
+);
+
+
 CREATE TABLE gamepad (
     id integer primary key autoincrement not null,
     participant_id integer not null references participants(id),

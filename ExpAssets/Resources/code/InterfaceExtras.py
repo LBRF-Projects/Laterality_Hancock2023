@@ -1,13 +1,15 @@
 __author__ = "Austin Hurst"
 
+from klibs import STROKE_INNER
 from klibs import P
 from klibs.KLBoundary import BoundaryInspector, RectangleBoundary, CircleBoundary
-from klibs.KLGraphics import fill, blit, flip, clear
+from klibs.KLGraphics import fill, blit, flip, clear, rgb_to_rgba
 from klibs.KLGraphics import KLDraw as kld
 from klibs.KLGraphics.KLNumpySurface import NumpySurface as NpS
 from klibs.KLCommunication import message
+from klibs.KLEventQueue import flush, pump
 from klibs.KLUserInterface import ui_request, key_pressed, get_clicks, mouse_clicked
-from klibs.KLUtilities import pump, show_mouse_cursor, hide_mouse_cursor, mouse_pos, clip
+from klibs.KLUtilities import show_mouse_cursor, hide_mouse_cursor, mouse_pos, clip
 from klibs.KLUtilities import line_segment_len as lsl
 from klibs.KLResponseCollectors import Response
 
@@ -21,14 +23,72 @@ TRANSLUCENT_GREY = (192, 192, 192, 64)
 TRANSLUCENT_BLUE = (0, 0, 128, 128)
 
 
+class Aesthetics(object):
+    """The aesthetic attributes to use for drawing an interface item.
+
+    Args:
+        color (tuple, optional): The RGBA color to use for the lines of the UI
+            element. If not specified, `P.default_color` will be used.
+        fill (tuple, optional): The RGBA color to use for the fill of the UI element.
+            If not specified, no fill color will be used.
+        thickness (int, optional): The thickness (in pixels) for the lines of the UI
+            element. The default varies based on the element the aesthetic is used with.
+        hover (tuple, optional): The translucent RGBA color to use for hover elements
+            in the UI element. Defaults to translucent light grey.
+        fontstyle (str, optional): The font style to use for rendering text within the
+            UI element. Defaults to the 'default' font style.
+        
+    """
+    def __init__(self, color=None, fill=None, thickness=None, hover=None, fontstyle=None):
+        # Handle colours and thicknesses
+        self._color = rgb_to_rgba(color) if color else P.default_color
+        self._fill = rgb_to_rgba(fill) if fill else None
+        self._thickness = int(thickness) if thickness else None
+        self._hover = rgb_to_rgba(color) if hover else TRANSLUCENT_GREY
+        self._fontstyle = fontstyle if fontstyle else 'default'
+
+    @property
+    def color(self):
+        return self._color
+
+    @property
+    def fill(self):
+        return self._fill
+
+    @property
+    def thickness(self):
+        return self._thickness
+
+    @property
+    def hover(self):
+        return self._hover
+
+    @property
+    def fontstyle(self):
+        return self._fontstyle
+
+
+
 class Button(object):
     
-    def __init__(self, msg, width, height=None, registration=5, location=None):
+    def __init__(self, msg, width, height=None, aes=None, registration=5, location=None):
+
+        # Initialize UI aesthetics
+        if not aes:
+            aes = Aesthetics(thickness=0)
+        if aes.thickness is None:
+            aes._thickness = 0
         
         self.width = width
         self.height = height if height else width
-        self.hover = kld.Rectangle(self.width, self.height, fill=TRANSLUCENT_GREY)
         self.msg = msg
+
+        self.button = None
+        if aes.thickness or aes.fill:
+            outline = [aes.thickness, aes.color, STROKE_INNER]
+            self.button = kld.Rectangle(self.width, self.height, outline, fill=aes.fill)
+        self.button = kld.Rectangle(self.width, self.height)
+        self.hover = kld.Rectangle(self.width, self.height, fill=aes.hover)
         
         self.__registration = registration
         self.__location = location if location else P.screen_c
@@ -59,6 +119,8 @@ class Button(object):
         
     def draw(self):
         blit(self.msg, 5, self.midpoint)
+        if self.button:
+            blit(self.button, 5, self.midpoint)
         mp = mouse_pos()
         if self.bounds.within(mp):
             blit(self.hover, 5, self.midpoint)
@@ -87,8 +149,18 @@ class Button(object):
 
 
 class LikertType(BoundaryInspector):
+    """A Likert-type rating scale for collecting numeric responses.
 
-    def __init__(self, first, last, width, height, style, registration=None, location=None):
+    Args:
+        first (int): The lowest digit on the scale.
+        last (int): The highest digit on the scale.
+        width (int): The full width of the scale.
+        height (int): The height of each circle on the scale.
+
+    """
+    def __init__(
+        self, first, last, width, height, aes=None, registration=None, location=None
+    ):
 
         BoundaryInspector.__init__(self)
 
@@ -105,14 +177,24 @@ class LikertType(BoundaryInspector):
         self._registration = registration if registration else 5
         self._init_bounds()
 
+        # Initialize UI aesthetics
+        if not aes:
+            aes = Aesthetics(thickness=0)
+        if aes.thickness is None:
+            aes._thickness = 0
+
         numlist = []
         for num in self.range:
-            num_txt = message("{0}".format(num), style, blit_txt=False)
+            num_txt = message("{0}".format(num), aes.fontstyle, blit_txt=False)
             numlist.append((num, num_txt))
         self.numbers = dict(numlist)
 
-        self.selected = kld.Ellipse(self.circle_size-4, fill=TRANSLUCENT_GREY)
-        self.mouseover = self.selected#kld.Annulus(self.circle_size-4, 6, fill=MED_GREY)
+        self.circle = None
+        if aes.thickness > 0:
+            outline = [aes.thickness, aes.color, STROKE_INNER]
+            self.circle = kld.Ellipse(self.circle_size-4, stroke=outline, fill=aes.fill)
+        self.selected = kld.Ellipse(self.circle_size-4, fill=aes.hover)
+        self.mouseover = self.selected
 
     def _init_bounds(self):
         if self.registration in [7, 4, 1]:
@@ -150,12 +232,14 @@ class LikertType(BoundaryInspector):
     def _render(self):
         for num in self.range:
             pos = self._num_to_pos(num)
+            if self.circle:
+                blit(self.circle, location=pos, registration=5)
             blit(self.numbers[num], location=pos, registration=5)
         if self.response != None:
             pos = self._num_to_pos(self.response)
             blit(self.selected, location=pos, registration=5)
 
-    def response_listener(self, queue):
+    def update(self, queue):
         self._render()
         num = self.which_boundary(mouse_pos())
         if num != None:
@@ -278,31 +362,44 @@ class Slider(object):
 
 class ThoughtProbe(BoundaryInspector):
 
-    def __init__(self, choices, question, width, origin, order=None):
+    def __init__(self, choices, question, origin, width=None, order=None):
 
         BoundaryInspector.__init__(self)
 
         self.q = question
-        self.width = width
+        self.width = self.q.width if width == None else width
         self.origin = origin
+        hover_col = TRANSLUCENT_GREY
 
         if order == None:
             order = list(choices.keys())
             random.shuffle(order)
         self.order = order
 
-        self.q_pad = 0.8 * message("ABCDEFG", "normal", blit_txt=False).height
-        x1 = origin[0] - width//2
-        x2 = origin[0] + width//2     
+        self.q_pad = 0.8 * message("ABCDEFG", "default", blit_txt=False).height
+        x1 = origin[0] - (self.width // 2)
+        x2 = origin[0] + (self.width // 2)     
         y1 = origin[1] + self.q.height + self.q_pad * 2
-       
+
+        # Render all response options and their hover boxes
         self.answers = {}
-        for a in order:
-            txt = message(choices[a], "normal", blit_txt=False, wrap_width=(width-self.q_pad//2), align='center')
-            y2 = y1 + txt.height + self.q_pad
-            bounds = RectangleBoundary(a, (x1, y1), (x2, y2))
-            self.add_boundary(bounds)
-            self.answers[a] = {'text': txt, 'location': (origin[0], y1), 'height': y2-y1}
+        max_width = 0
+        for a in self.order:
+            txt = message(choices[a], "default", blit_txt=False)
+            if txt.width > max_width:
+                max_width = txt.width
+            hover_height = txt.height + self.q_pad
+            self.answers[a] = {
+                'text': txt,
+                'hover': kld.Rectangle(self.width, hover_height, fill=hover_col),
+            }
+
+        # Calculate the location and boundary for each response option
+        for a in self.order:
+            y2 = y1 + self.answers[a]['text'].height + self.q_pad
+            self.add_boundary(RectangleBoundary(a, (x1, y1), (x2, y2)))
+            text_loc = (origin[0] - max_width // 2, y1 + int(self.q_pad * 0.55))
+            self.answers[a]['location'] = text_loc
             y1 = y2
 
 
@@ -311,26 +408,22 @@ class ThoughtProbe(BoundaryInspector):
         blit(self.q, location=self.origin, registration=8)
         for ans in self.order:
             a = self.answers[ans]
-            ax, ay = a['location']
-            blit(a['text'], location=(ax, ay + int(self.q_pad*0.55)), registration=8)
+            blit(a['text'], location=a['location'], registration=7)
 
         mouseover = self.which_boundary(mouse_pos())
         if mouseover != None:
             a = self.answers[mouseover]
-            hover = kld.Rectangle(self.width, a['height'], fill=TRANSLUCENT_GREY).render()
-            blit(hover, 8, a['location'])
+            hover_loc = self.boundaries[mouseover].p1
+            blit(a['hover'], 7, hover_loc)
 
 
     def _collect(self):
-
         q = pump(True)
-        ui_request(queue=q)
-        for e in q:
-            if e.type == sdl2.SDL_MOUSEBUTTONDOWN:
-                coords = (e.button.x, e.button.y)
-                response = self.which_boundary(coords)
-                if response != None:
-                    return response
+        clicks = get_clicks(released=True, queue=q)
+        for click in clicks:
+            response = self.which_boundary(click)
+            if response != None:
+                return response
         return None
 
 
@@ -340,6 +433,7 @@ class ThoughtProbe(BoundaryInspector):
         response = None
         onset = time.time()
 
+        flush()
         while response == None:
             fill()
             self._render()

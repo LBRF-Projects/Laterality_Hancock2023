@@ -19,7 +19,8 @@ from klibs.KLUtilities import line_segment_len as linear_dist
 from klibs.KLTime import CountDown, precise_time
 from klibs.KLCommunication import message
 
-from gamepad import gamepad_init,button_pressed
+from KVIQ import KVIQ
+from gamepad import gamepad_init, button_pressed
 from gamepad_usb import get_all_controllers
 
 # Define colours for use in the experiment
@@ -36,6 +37,14 @@ TRIGGER_MAX = 32767
 class MotorMapping(klibs.Experiment):
 
     def setup(self):
+
+        # Prior to starting the task, run through the KVIQ
+        kviq = KVIQ()
+        responses = kviq.run()
+        for movement, dat in responses.items():
+            dat['participant_id'] = P.participant_id
+            dat['movement'] = movement
+            self.db.insert(dat, table='kviq')
 
         # Initialize stimulus sizes and layout
         screen_h_deg = (P.screen_y / 2.0) / deg_to_px(1.0)
