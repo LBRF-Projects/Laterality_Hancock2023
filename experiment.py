@@ -183,6 +183,8 @@ class MotorMapping(klibs.Experiment):
         contact_rt = None
         response_rt = None
         initial_angle = None
+        axis_data = []
+        last_x, last_y = (-1, -1)
 
         # Get joystick mapping for the trial
         mod_x, mod_y = P.input_mappings[self.joystick_map]
@@ -249,15 +251,17 @@ class MotorMapping(klibs.Experiment):
 
             # Log continuous cursor x/y data for each frame
             if target_on and cursor_movement:
-                dat = {
-                    'participant_id': P.participant_id,
-                    'block_num': P.block_number,
-                    'trial_num': P.trial_number,
-                    'time': int((input_time - target_on) * 1000),
-                    'stick_x': cursor_pos[0],
-                    'stick_y': cursor_pos[1],
-                }
-                self.db.insert(dat, table='gamepad')
+                # Only log samples where position actually changes (to save space)
+                any_change = (cursor_pos[0] != last_x) or (cursor_pos[1] != last_y)
+                if any_change:
+                    axis_sample = (
+                        int((input_time - target_on) * 1000), # timestamp
+                        cursor_pos[0], # joystick x
+                        cursor_pos[1], # joystick y
+                    )
+                    axis_data.append(axis_sample)
+                last_x = cursor_pos[0]
+                last_y = cursor_pos[1]
             
             # Actually draw stimuli to the screen
             fill()
@@ -303,6 +307,19 @@ class MotorMapping(klibs.Experiment):
         elif err == "NA":
             feedback = self.errs['too_slow']
             self.show_feedback(feedback, duration=2.0)
+
+        # Write raw axis data to database
+        if err == "NA":
+            for timestamp, stick_x, stick_y in axis_data:
+                dat = {
+                    'participant_id': P.participant_id,
+                    'block_num': P.block_number,
+                    'trial_num': P.trial_number,
+                    'time': timestamp,
+                    'stick_x': stick_x,
+                    'stick_y': stick_y,
+                }
+                self.db.insert(dat, table='gamepad')
 
         return {
             "block_num": P.block_number,
