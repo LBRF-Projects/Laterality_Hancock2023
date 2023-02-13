@@ -214,12 +214,18 @@ class MotorMapping(klibs.Experiment):
                 P.screen_c[1] + int(jy * self.target_dist_max * mod_y)
             )
 
-            # Handle input based on trial type and trial phase
+            # Handle input based on trial type and trials phase
             triggers_released = lt < 0.2 and rt < 0.2
             cursor_movement = linear_dist(cursor_pos, P.screen_c)
-            if target_on and not movement_rt and cursor_movement > 0:
-                movement_rt = input_time - target_on
-                initial_angle = vector_angle(P.screen_c, cursor_pos)
+            if target_on:
+                # As soon as cursor moves after target onset, log movement RT
+                if not movement_rt and cursor_movement > 0:
+                    movement_rt = input_time - target_on
+                # Once cursor has moved slightly away from origin, log initial angle
+                if not initial_angle and px_to_deg(cursor_movement) > 0.05:
+                    initial_angle = vector_angle(P.screen_c, cursor_pos)
+
+            # Detect/handle different types of trial error
             err = "NA"
             if cursor_movement > self.cursor_size:
                 if self.trial_type == "MI":
