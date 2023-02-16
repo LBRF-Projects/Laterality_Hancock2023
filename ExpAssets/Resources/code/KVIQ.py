@@ -5,7 +5,7 @@ from klibs.KLUserInterface import (
     key_pressed, ui_request, show_cursor, hide_cursor, smart_sleep, any_key,
 )
 from klibs.KLUtilities import deg_to_px
-from klibs.KLGraphics import fill, blit, flip
+from klibs.KLGraphics import fill, blit, flip, NumpySurface
 from klibs.KLCommunication import message
 
 from InterfaceExtras import Button, LikertType, ThoughtProbe, Aesthetics
@@ -23,11 +23,60 @@ from InterfaceExtras import Button, LikertType, ThoughtProbe, Aesthetics
 # 5. Foot tapping
 #    - Just tapping foot up and down in place, heel on floor
 
+imagery_desc = [
+    "Thank you for participating in this study!",
+    ("At some points during the experiment you will be asked to perform 'motor "
+     "imagery', which is defined as the mental rehearsal of movement. Specifically, "
+     "motor imagery involves simulating in your mind what it would *feel like* to "
+     "perform a given movement (without actually performing it)."),
+    ("For example, if you were to perform motor imagery of clapping your hands "
+     "together, you might imagine the feeling of opening your palms, the motion of "
+     "your arms, and the feeling of your hands coming into contact. You might also "
+     "imagine what it would look or sound like to perform the action.")
+]
+
+intro_1 = [
+    ("Before you start the main task, we are going to do a quick assessment of the "
+     "clarity and intensity with which you can perform motor imagery. This will "
+     "involve performing and then imagining five different movements."),
+]
+intro_2 = [
+    "You will perform each movement three times: once physically, and twice mentally.",
+    ("First, after the movement has been explained to you, you will perform it "
+     "physically to familiarize yourself with it."),
+    ("Second, you will be asked to imagine "
+     "what it would look like to *watch someone else* perform that same movement "
+     "(third-person imagery)."),
+    ("Finally, you will be asked to imagine what it would feel "
+     "like to perform the movement *yourself* (first-person imagery)."),
+]
+intro_3 = [
+    ("To record how long each movement takes, please press the space bar when you "
+     "start the movement and then press it again when you have finished."),
+    ("Some of the movements will be done with the dominant side of your body, others "
+     "will be done with the non-dominant side."),
+]
+intro_4 = [
+    ("Each time you imagine watching someone else perform a movement, you will be "
+     "asked to rate the clarity of your mental image of the movement on a scale "
+     "from 1 to 5."),
+    "Press any key to see an example of this scale.",
+]
+intro_5 = [
+    ("Similarly, each time you imagine performing the movement yourself, you will be "
+     "asked to rate the intensity of the imagined sensations on a scale from 1 to 5."),
+    "Press any key to see an example of this scale.",
+]
+intro_6 = [
+    ("You're almost ready to start! If you have any questions about the task, please "
+     "raise your hand now. Otherwise, press any key to read the description of the "
+     "first movement."),
+]
+
 physical = (
     "First, we'll perform the movement physically.\nWhen you press the space bar "
     "to start, please "
 )
-
 visual = (
     "Next, we'll imagine the same movement visually, from a 3rd-person "
     "perspective.\nWhen you press the space bar to start, please close your eyes and "
@@ -106,27 +155,78 @@ kinaesthetic_ratings = {
     '1': "1 - No sensation",
 }
 
+def render_text(msgs, spacing=None, align="center", width=None):
+    # Initialize defaults and inputs
+    if not isinstance(msgs, list):
+        msgs = [msgs]
+    if not spacing:
+        spacing = deg_to_px(0.5) # change to default text height in pixels?
+    if not width:
+        width = int(P.screen_x * 0.8)
 
-def demo_msg(msgs, wait=1.0, resp=True, msg_y=None):
-    msg_x = int(P.screen_x / 2)
-    msg_y = int(P.screen_y * 0.4) if msg_y is None else msg_y
+    # Render all chunks of text and determine the total height
+    total_height = 0
+    rendered = []
+    for msg in msgs:
+        # If we're in between paragraphs, insert padding
+        if len(rendered) > 0:
+            total_height += spacing
+        # Render the message and add its height to the total
+        chunk = message(msg, blit_txt=False, align=align, wrap_width=width)
+        total_height += chunk.height
+        rendered.append(chunk)
+
+    # Combine all rendered chunks into a single surface texture
+    surf = NumpySurface(width=width, height=total_height)
+    y_pos = 0
+    x_pos = int(width / 2) if align == "center" else 0
+    blit_reg = 8 if align == "center" else 7
+    for msg in rendered:
+        # If not on first message, add between-chunk padding
+        if y_pos > 0:
+            y_pos += spacing
+        # Render the text to the surface
+        surf.blit(msg, blit_reg, (x_pos, y_pos), blend=False)
+        y_pos += msg.height
+
+    return surf
+
+
+def demo_msg(msgs, wait=1.0, resp=True, registration=5, location=P.screen_c):
+
     half_space = deg_to_px(0.5)
-    wrap = int(P.screen_x * 0.7)
+    wrap = int(P.screen_x * 0.75)
+    msg_surf = render_text(msgs, spacing=half_space, width=wrap)
 
     fill()
-    if not isinstance(msgs, list):
-        msg_y = int(P.screen_y * 0.15)
-        msgs = [msgs]
-    for msg in msgs:
-        txt = message(msg, blit_txt=False, align="center", wrap_width=wrap)
-        blit(txt, 8, (msg_x, msg_y))
-        msg_y += txt.height + half_space
+    blit(msg_surf, 5, P.screen_c)
     flip()
 
     if wait:
         smart_sleep(wait * 1000)
     if resp:
         any_key()
+
+#def demo_msg(msgs, wait=1.0, resp=True, msg_y=None):
+#    msg_x = int(P.screen_x / 2)
+#    msg_y = int(P.screen_y * 0.4) if msg_y is None else msg_y
+#    half_space = deg_to_px(0.5)
+#    wrap = int(P.screen_x * 0.7)
+#
+#    fill()
+#    if not isinstance(msgs, list):
+#        msg_y = int(P.screen_y * 0.15)
+#        msgs = [msgs]
+#    for msg in msgs:
+#        txt = message(msg, blit_txt=False, align="center", wrap_width=wrap)
+#        blit(txt, 8, (msg_x, msg_y))
+#        msg_y += txt.height + half_space
+#    flip()
+#
+#    if wait:
+#        smart_sleep(wait * 1000)
+#    if resp:
+#        any_key()
 
 
 
@@ -137,11 +237,27 @@ class KVIQ(object):
 
 
     def run(self):
+        self._instructions()
         # Runs the full KVIQ and returns responses in a dict
         responses = {}
         for name, movement in kviq_movements.items():
             responses[name] = self._collect_movement(movement)
         return responses
+
+
+    def _instructions(self):
+        demo_msg(imagery_desc)
+        demo_msg(intro_1)
+        demo_msg(intro_2)
+        demo_msg(intro_3)
+
+        demo_msg(intro_4)
+        self._collect_rating(kinaesthetic=False)
+
+        demo_msg(intro_5)
+        self._collect_rating(kinaesthetic=True)
+
+        demo_msg(intro_6)
 
 
     def _collect_movement(self, info):
@@ -189,7 +305,7 @@ class KVIQ(object):
         # Once started, remove 'press space to start' prompt and wait for second
         # space bar press to end.
         timer = Stopwatch(start=True)
-        demo_msg(instructions, wait=False)
+        demo_msg("[Press space when finished]", wait=False)
         timer.pause()
 
         # On second press, return movement duration
