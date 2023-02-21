@@ -7,12 +7,11 @@ verify_ssl = true
 pylint = "*"
 
 [packages]
-klibs = {git = "https://github.com/a-hurst/klibs.git", ref = "c28c6f2d040da0b35f84fde5da0a7c9aacda0107"}
-colorednoise = "*"
+klibs = {file = "https://github.com/a-hurst/klibs/releases/download/0.7.6b1/klibs.tar.gz"}
 pyusb = "*"
 libusb_package = "*"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
 
 [scripts]
