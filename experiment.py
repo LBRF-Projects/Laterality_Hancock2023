@@ -39,6 +39,7 @@ class MotorMapping(klibs.Experiment):
     def setup(self):
 
         # Prior to starting the task, run through the KVIQ
+        self.txtm.add_style('title', '0.75deg')
         kviq = KVIQ()
         responses = kviq.run()
         for movement, dat in responses.items():

@@ -24,7 +24,7 @@ from InterfaceExtras import Button, LikertType, ThoughtProbe, Aesthetics
 #    - Just tapping foot up and down in place, heel on floor
 
 imagery_desc = [
-    "Thank you for participating in this study!",
+    "Thank you for participating in this study!\n",
     ("At some points during the experiment you will be asked to perform 'motor "
      "imagery', which is defined as the mental rehearsal of movement. Specifically, "
      "motor imagery involves simulating in your mind what it would *feel like* to "
@@ -37,40 +37,42 @@ imagery_desc = [
 
 intro_1 = [
     ("Before you start the main task, we are going to do a quick assessment of the "
-     "clarity and intensity with which you can perform motor imagery. This will "
-     "involve performing and then imagining five different movements."),
+     "clarity\n"
+     "and intensity with which you can perform motor imagery. This will involve "
+     "performing\n"
+     "and then imagining five different movements."),
 ]
 intro_2 = [
-    "You will perform each movement three times: once physically, and twice mentally.",
-    ("First, after the movement has been explained to you, you will perform it "
-     "physically to familiarize yourself with it."),
-    ("Second, you will be asked to imagine "
-     "what it would look like to *watch someone else* perform that same movement "
-     "(third-person imagery)."),
-    ("Finally, you will be asked to imagine what it would feel "
-     "like to perform the movement *yourself* (first-person imagery)."),
+    "You will perform each movement three times: once physically, and twice mentally.\n",
+    ("First, after the movement has been explained to you, you will perform\n"
+     "it physically to familiarize yourself with how it looks and feels."),
+    ("Second, you will be asked to imagine what it would look like to watch\n"
+     "*someone else* perform that movement (third-person imagery)."),
+    ("Finally, you will be asked to imagine what it would feel like to perform\n"
+     "the movement *yourself* (first-person imagery)."),
 ]
 intro_3 = [
-    ("To record how long each movement takes, please press the space bar when you "
-     "start the movement and then press it again when you have finished."),
-    ("Some of the movements will be done with the dominant side of your body, others "
-     "will be done with the non-dominant side."),
+    ("Some of the movements will be done with the dominant side of your body,\n"
+     "others will be done with the non-dominant side."),
+    ("To record how long each movement takes, please press the space bar when\n"
+     "you start the movement and then press it again when you have finished."),
 ]
 intro_4 = [
     ("Each time you imagine watching someone else perform a movement, you will be "
-     "asked to rate the clarity of your mental image of the movement on a scale "
-     "from 1 to 5."),
+     "asked\n"
+     "to rate the clarity of your mental image on a scale from 1 to 5."),
     "Press any key to see an example of this scale.",
 ]
 intro_5 = [
     ("Similarly, each time you imagine performing the movement yourself, you will be "
-     "asked to rate the intensity of the imagined sensations on a scale from 1 to 5."),
+     "asked\n"
+     "to rate the intensity of the imagined sensations on a scale from 1 to 5."),
     "Press any key to see an example of this scale.",
 ]
 intro_6 = [
     ("You're almost ready to start! If you have any questions about the task, please "
-     "raise your hand now. Otherwise, press any key to read the description of the "
-     "first movement."),
+     "raise your hand now.\n"
+     "Otherwise, press any key to read the description of the first movement."),
 ]
 
 physical = (
@@ -88,13 +90,11 @@ kinaesthetic = (
     "imagine how would look and feel to "
 )
 
-#movement_end_msg = ("When you are finished, please press the space bar again to "
-#    "indicate that you are done.")
 
 kviq_movements = {
     'Forward Shoulder Flexion': {
         '3rd_sub': {'raise ': 'raising ', 'lower': 'lowering', 'your': 'their'},
-        'start_pos': "with your left arm flat against your side.",
+        'start_pos': "with your left arm\nflat against your side.",
         'desc': (
             "raise your left arm forwards with a straight elbow until it is fully "
             "raised, then lower it to its original position."
@@ -102,7 +102,7 @@ kviq_movements = {
     },
     'Thumb-Fingers Opposition': {
         '3rd_sub': {'tap': 'tapping', 'your': 'their'},
-        'start_pos': "with your left hand raised and your palm facing upwards.",
+        'start_pos': "with your left hand\nraised and your palm facing upwards.",
         'desc': (
             "tap your thumb to each finger on your left hand, starting with the pinkie "
             "and moving inward."
@@ -110,7 +110,7 @@ kviq_movements = {
     },
     'Forward Trunk Flexion': {
         '3rd_sub': {'bend': 'bending', 'return': 'returning', 'your': 'their'},
-        'start_pos': "upright in a comfortable position.",
+        'start_pos': "upright in\na comfortable position.",
         'desc': (
             "bend forwards in your seat to look at the floor, then return to your "
             "original sitting position."
@@ -118,7 +118,7 @@ kviq_movements = {
     },
     'Hip Abduction': {
         '3rd_sub': {'move': 'moving', 'your': 'their'},
-        'start_pos': "with your feet and knees together.",
+        'start_pos': "with your\nfeet and knees together.",
         'desc': (
             "move your left leg away from your other leg and then return to your "
             "original position, keeping your knees bent."
@@ -126,7 +126,7 @@ kviq_movements = {
     },
     'Foot Tapping': {
         '3rd_sub': {'tap': 'tapping', 'your': 'their'},
-        'start_pos': "upright in a comfortable position.",
+        'start_pos': "upright in\na comfortable position.",
         'desc': (
             "tap your left foot 8 times on the floor, keeping your heel in place."
         ),
@@ -135,9 +135,7 @@ kviq_movements = {
 
 start_pos_prefix = "The starting position for this movement is to be sitting "
 movement_prefix = "To perform this movement, please "
-wait_msg = (
-    "Please wait for a researcher to demonstrate the movement before you continue."
-)
+wait_msg = "Please wait for a researcher to demonstrate the movement."
 
 visual_ratings = {
     '5': "5 - Image as clear as seeing",
@@ -192,14 +190,16 @@ def render_text(msgs, spacing=None, align="center", width=None):
     return surf
 
 
-def demo_msg(msgs, wait=1.0, resp=True, registration=5, location=P.screen_c):
+def demo_msg(msgs, extras=None, wait=0.1, resp=True, spacing=None, width=None):
 
-    half_space = deg_to_px(0.5)
-    wrap = int(P.screen_x * 0.75)
-    msg_surf = render_text(msgs, spacing=half_space, width=wrap)
+    if not extras:
+        extras = []
+    msg_surf = render_text(msgs, spacing=spacing, width=width)
 
     fill()
     blit(msg_surf, 5, P.screen_c)
+    for e in extras:
+        blit(e['img'], e['reg'], e['loc'])
     flip()
 
     if wait:
@@ -207,33 +207,13 @@ def demo_msg(msgs, wait=1.0, resp=True, registration=5, location=P.screen_c):
     if resp:
         any_key()
 
-#def demo_msg(msgs, wait=1.0, resp=True, msg_y=None):
-#    msg_x = int(P.screen_x / 2)
-#    msg_y = int(P.screen_y * 0.4) if msg_y is None else msg_y
-#    half_space = deg_to_px(0.5)
-#    wrap = int(P.screen_x * 0.7)
-#
-#    fill()
-#    if not isinstance(msgs, list):
-#        msg_y = int(P.screen_y * 0.15)
-#        msgs = [msgs]
-#    for msg in msgs:
-#        txt = message(msg, blit_txt=False, align="center", wrap_width=wrap)
-#        blit(txt, 8, (msg_x, msg_y))
-#        msg_y += txt.height + half_space
-#    flip()
-#
-#    if wait:
-#        smart_sleep(wait * 1000)
-#    if resp:
-#        any_key()
-
 
 
 class KVIQ(object):
 
     def __init__(self, left_handed=False):
         self.left_handed = left_handed
+        self.extras = [] # Extra stimuli for demo_msg
 
 
     def run(self):
@@ -241,8 +221,15 @@ class KVIQ(object):
         # Runs the full KVIQ and returns responses in a dict
         responses = {}
         for name, movement in kviq_movements.items():
+            self._update_title(name)
             responses[name] = self._collect_movement(movement)
         return responses
+
+
+    def _update_title(self, movement):
+        loc = (P.screen_c[0], int(P.screen_y * 0.15))
+        title = message(movement, style="title", blit_txt=False)
+        self.extras = [{'img': title, 'reg': 8, 'loc': loc}] 
 
 
     def _instructions(self):
@@ -273,11 +260,10 @@ class KVIQ(object):
             info['start_pos'] = info['start_pos'].replace('left', 'right')
         info = [
             start_pos_prefix + info['start_pos'],
-            movement_prefix + desc_1st,
-            " ",
+            movement_prefix + desc_1st + "\n",
             wait_msg,
         ]
-        demo_msg(info)
+        demo_msg(info, self.extras, width=int(P.screen_x * 0.65))
 
         # Perform movement physically first
         dat = {}
@@ -299,13 +285,14 @@ class KVIQ(object):
 
     def _wait_for_movement(self, instructions):
         # Present the initial instructions and wait for input
-        spacebar_txt = [" ", "Press the space bar to begin."]
-        demo_msg(instructions + spacebar_txt, wait=False)
+        instructions[-1] = instructions[-1] + "\n"
+        instructions += ["Press [space] to begin."]
+        demo_msg(instructions, self.extras, wait=False, width=int(P.screen_x * 0.65))
 
         # Once started, remove 'press space to start' prompt and wait for second
         # space bar press to end.
         timer = Stopwatch(start=True)
-        demo_msg("[Press space when finished]", wait=False)
+        demo_msg("Press [space] when finished.", wait=False)
         timer.pause()
 
         # On second press, return movement duration
