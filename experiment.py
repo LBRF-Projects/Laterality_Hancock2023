@@ -54,7 +54,7 @@ class MotorMapping(klibs.Experiment):
         self.cursor_size = deg_to_px(P.cursor_size)
         self.target_size = deg_to_px(0.3)
         self.target_dist_min = deg_to_px(3.0)
-        self.target_dist_max = deg_to_px(screen_h_deg - 1.0)
+        self.target_dist_max = deg_to_px(8.0)
         self.lower_middle = (P.screen_c[0], int(P.screen_y * 0.75))
         self.msg_loc = (P.screen_c[0], int(P.screen_y * 0.4))
 
