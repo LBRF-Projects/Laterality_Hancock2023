@@ -360,6 +360,16 @@ class MotorMapping(klibs.Experiment):
 
 
     def clean_up(self):
+        
+        end_txt = (
+            "You're all done, thanks for participating!\nPress any button to exit."
+        )
+        end_msg = message(end_txt, blit_txt=False, align='center')
+        fill()
+        blit(end_msg, 5, P.screen_c)
+        flip()
+        wait_for_input(self.gamepad)
+
         if self.gamepad:
             self.gamepad.close()
 
