@@ -112,18 +112,19 @@ class MotorMapping(klibs.Experiment):
 
         block_msgs = {
             "PP": (
-                "For the next set of trials, please use the right stick to move the\n"
-                "cursor over the target, then press one of the back triggers."
+                "For this next set of trials, please respond to targets physically by\n"
+                "using the gamepad's right stick to move the cursor over them."
             ),
             "MI": (
-                "For the next set of trials, please try to imagine what it would look\n"
-                "and feel like to move the cursor over the target (without actually\n"
-                "moving it), then press one of the back triggers when you have\n"
-                "completed the imagined movement."
+                "For this next set of trials, please respond to targets using *motor "
+                "imagery*,\nimagining what it would feel like to move the cursor over "
+                "each target\n(without actually moving), then physically pressing the "
+                "left trigger when finished."
             ),
             "CC": (
-                "For the next set of trials, please press one of the back triggers as\n"
-                "soon as you see the target appear (without moving the joystick)."
+                "For this next set of trials, please respond to targets by simply "
+                "pressing\nthe left trigger as quickly as possible, without moving the "
+                "cursor."
             )
         }
         inverted_msg = (
@@ -145,10 +146,13 @@ class MotorMapping(klibs.Experiment):
             self.joystick_map = P.training_mapping
             self.trial_type = "PP"
             block_msg = "This is a practice block.\n\n" + block_msgs["PP"]
+            block_msg = block_msg.replace("next", "first")
         elif self.phase == "training":
             self.joystick_map = P.training_mapping
             self.trial_type = P.condition
             block_msg = block_msgs[self.trial_type]
+            if self.trial_type == "PP":
+                block_msg = block_msg.replace("please", "please continue to")
         elif self.phase == "test":
             self.joystick_map = P.test_mapping
             self.trial_type = "PP"
