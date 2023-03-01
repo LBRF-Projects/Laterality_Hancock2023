@@ -2,7 +2,7 @@ from klibs import P
 from klibs.KLTime import Stopwatch
 from klibs.KLEventQueue import flush, pump
 from klibs.KLUserInterface import (
-    key_pressed, ui_request, show_cursor, hide_cursor, smart_sleep, any_key,
+    key_pressed, ui_request, show_cursor, hide_cursor, smart_sleep, mouse_clicked,
 )
 from klibs.KLUtilities import deg_to_px
 from klibs.KLGraphics import fill, blit, flip, NumpySurface
@@ -204,8 +204,11 @@ def demo_msg(msgs, extras=None, wait=0.1, resp=True, spacing=None, width=None):
 
     if wait:
         smart_sleep(wait * 1000)
-    if resp:
-        any_key()
+    flush()
+    while resp:
+        q = pump(True)
+        if key_pressed('space', queue=q) or mouse_clicked(queue=q):
+            break
 
 
 
@@ -292,7 +295,7 @@ class KVIQ(object):
         # Once started, remove 'press space to start' prompt and wait for second
         # space bar press to end.
         timer = Stopwatch(start=True)
-        demo_msg("Press [space] when finished.", wait=False)
+        demo_msg("Press [space] when finished.", wait=0.5)
         timer.pause()
 
         # On second press, return movement duration
