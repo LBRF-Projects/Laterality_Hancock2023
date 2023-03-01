@@ -13,11 +13,13 @@ from klibs.KLExceptions import TrialException
 from klibs.KLGraphics import fill, flip, blit
 from klibs.KLGraphics import KLDraw as kld
 from klibs.KLEventQueue import flush, pump
-from klibs.KLUserInterface import any_key, mouse_pos, ui_request, hide_cursor
 from klibs.KLUtilities import angle_between, point_pos, deg_to_px, px_to_deg
 from klibs.KLUtilities import line_segment_len as linear_dist
 from klibs.KLTime import CountDown, precise_time
 from klibs.KLCommunication import message
+from klibs.KLUserInterface import (
+    any_key, mouse_pos, ui_request, hide_cursor, smart_sleep,
+)
 
 from KVIQ import KVIQ
 from gamepad import gamepad_init, button_pressed
@@ -99,6 +101,9 @@ class MotorMapping(klibs.Experiment):
 
         # Insert practice block
         self.insert_practice_block(1, trial_counts=P.practice_trials)
+
+        # Run a visual demo explaining the task
+        self.task_demo()
 
 
     def block(self):
@@ -375,6 +380,102 @@ class MotorMapping(klibs.Experiment):
 
         if self.gamepad:
             self.gamepad.close()
+
+
+    def show_demo_text(self, msgs, stim_set, duration=1.0, wait=True, msg_y=None):
+        msg_x = int(P.screen_x / 2)
+        msg_y = int(P.screen_y * 0.25) if msg_y is None else msg_y
+        half_space = deg_to_px(0.5)
+
+        fill()
+        if not isinstance(msgs, list):
+            msgs = [msgs]
+        for msg in msgs:
+            txt = message(msg, blit_txt=False, align="center")
+            blit(txt, 8, (msg_x, msg_y))
+            msg_y += txt.height + half_space
+    
+        for stim, locs in stim_set:
+            if not isinstance(locs, list):
+                locs = [locs]
+            for loc in locs:
+                blit(stim, 5, loc)
+        flip()
+        smart_sleep(duration * 1000)
+        if wait:
+            wait_for_input(self.gamepad)
+
+
+    def task_demo(self):
+        # Initialize task stimuli for the demo
+        target_dist = (2 * self.target_dist_min + self.target_dist_max) / 3
+        target_loc = vector_to_pos(P.screen_c, target_dist, 250)
+        feedback = message("{:.3f}".format(2.841), blit_txt=False)
+        base_layout = [
+            (self.fixation, P.screen_c),
+            (self.cursor, P.screen_c),
+        ]
+        
+        # Actually run through demo
+        self.show_demo_text(
+            "Welcome to the experiment! This tutorial will help explain the task.",
+            [(self.fixation, P.screen_c), (self.cursor, P.screen_c)]
+        )
+        self.show_demo_text(
+            ("On each trial of the task, a small white target will appear at a random "
+             "distance\nfrom the fixation cross at the middle of the screen."),
+            [(self.fixation, P.screen_c), (self.target, target_loc),
+             (self.cursor, P.screen_c)]
+        )
+        self.show_demo_text(
+            ("Your job will be to quickly move the red cursor over top of the target "
+             "when it appears,\nusing the right stick on the gamepad."),
+            [(self.fixation, P.screen_c), (self.target, target_loc),
+             (self.cursor, (target_loc[0] + 4, target_loc[1] + 6))]
+        )
+        self.show_demo_text(
+            ("Once you have moved the cursor over the target, please squeeze the left "
+             "trigger on the \nback of the gamepad to end the trial. You will be shown "
+             "your reaction time."),
+            [(feedback, P.screen_c)]
+        )
+        target_dist = (self.target_dist_min + self.target_dist_max) / 2
+        target_loc = vector_to_pos(P.screen_c, target_dist, 165)
+        if P.condition == "MI":
+            feedback = message("{:.3f}".format(3.347), blit_txt=False)
+            self.show_demo_text(
+                ("In some parts of the study, you will be asked to perform this task "
+                "using motor imagery,\ni.e. imagine what it would *look and feel like* "
+                "to move the cursor over the target."),
+                [(self.fixation, P.screen_c), (self.target, target_loc),
+                (self.cursor, P.screen_c)]
+            )
+            self.show_demo_text(
+                ("When the target appears on an imagery trial, try to mentally "
+                 "simulate performing\nthe thumb movement required to move the cursor "
+                 "over the target (without actually moving)."),
+                [(self.fixation, P.screen_c), (self.target, target_loc),
+                 (self.cursor, P.screen_c)]
+            )
+            self.show_demo_text(
+                ("Once you have imagined the movement and are over the target (in your "
+                 "mind's eye),\nplease physically squeeze the left trigger to end the "
+                 "trial."),
+                [(feedback, P.screen_c)]
+            )
+        if P.condition == "CC":
+            self.show_demo_text(
+                ("In some parts of the study, instead of moving the cursor to the "
+                "target, you will be\nasked to simply squeeze the left trigger as soon "
+                "as the target appears."),
+                [(self.fixation, P.screen_c), (self.target, target_loc),
+                (self.cursor, P.screen_c)]
+            )
+            self.show_demo_text(
+                ("As usual, pressing the trigger will end the trial and display your "
+                 "reaction time.\nPlease try to respond as quickly as possible."),
+                [(feedback, P.screen_c)]
+            )
 
 
     def show_gamepad_debug(self):
