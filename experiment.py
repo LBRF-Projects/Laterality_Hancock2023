@@ -85,7 +85,7 @@ class MotorMapping(klibs.Experiment):
             "too_slow": "Too slow!\nPlease try to respond faster.",
             "stick_mi": (
                 "Joystick moved!\n"
-                "Please try to only imagine moving the stick over the target\n"
+                "Please try to only *imagine* moving the stick over the target\n"
                 "without actually performing the movement."
             ),
             "stick_cc": (
@@ -167,10 +167,6 @@ class MotorMapping(klibs.Experiment):
         blit(msg2, 5, self.lower_middle)
         flip()
         wait_for_input(self.gamepad)
-        
-
-    def setup_response_collector(self):
-        pass
 
 
     def trial_prep(self):
@@ -244,8 +240,11 @@ class MotorMapping(klibs.Experiment):
                 if not movement_rt and cursor_movement > 0:
                     movement_rt = input_time - target_on
                 # Once cursor has moved slightly away from origin, log initial angle
-                if not initial_angle and px_to_deg(cursor_movement) > 0.05:
-                    initial_angle = vector_angle(P.screen_c, cursor_pos)
+                if not initial_angle and px_to_deg(cursor_movement) > 0.1:
+                    # Wait at least 50 ms after first movement before calculating angle
+                    # (otherwise we get lots of 270s due to no y-axis change)
+                    if input_time - (target_on + movement_rt) < 0.05:
+                        initial_angle = vector_angle(P.screen_c, cursor_pos)
 
             # Detect/handle different types of trial error
             err = "NA"
