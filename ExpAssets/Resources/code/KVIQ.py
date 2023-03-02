@@ -56,6 +56,8 @@ intro_3 = [
      "others will be done with the non-dominant side."),
     ("To record how long each movement takes, please press the space bar when\n"
      "you start the movement and then press it again when you have finished."),
+    ("If a movement requires the use of an arm or hand, please use the\n"
+     "*opposite* hand to press the space bar."),
 ]
 intro_4 = [
     ("Each time you imagine watching someone else perform a movement, you will be "
@@ -128,7 +130,7 @@ kviq_movements = {
         '3rd_sub': {'tap': 'tapping', 'your': 'their'},
         'start_pos': "upright in\na comfortable position.",
         'desc': (
-            "tap your left foot 8 times on the floor, keeping your heel in place."
+            "tap your left foot 5 times on the floor, keeping your heel in place."
         ),
     },
 }
