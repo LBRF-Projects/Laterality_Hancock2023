@@ -242,10 +242,10 @@ class KVIQ(object):
         demo_msg(intro_3)
 
         demo_msg(intro_4)
-        self._collect_rating(kinaesthetic=False)
+        self._collect_rating(kinaesthetic=False, demo=True)
 
         demo_msg(intro_5)
-        self._collect_rating(kinaesthetic=True)
+        self._collect_rating(kinaesthetic=True, demo=True)
 
         demo_msg(intro_6)
 
@@ -302,7 +302,7 @@ class KVIQ(object):
         return timer.elapsed()
 
 
-    def _collect_rating(self, kinaesthetic=False):
+    def _collect_rating(self, kinaesthetic=False, demo=False):
         # Generate the prompt and rating choices based on the type of imagery
         prompt_txt = "Using the scale below, how {0} was the imagined movement?"
         if kinaesthetic:
@@ -320,5 +320,18 @@ class KVIQ(object):
         )
 
         # Collect and return the rating
-        rating = scale.collect()
-        return int(rating.value)
+        response = 0
+        if demo:
+            show_cursor()
+            while True:
+                q = pump(True)
+                if key_pressed(' ', queue=q) or mouse_clicked(queue=q):
+                    break
+                fill()
+                scale._render()
+                flip()
+            hide_cursor()
+        else:
+            rating = scale.collect()
+            response = rating.value
+        return int(response)
