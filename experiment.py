@@ -119,7 +119,8 @@ class MotorMapping(klibs.Experiment):
                 "For this next set of trials, please respond to targets using *motor "
                 "imagery*,\nimagining what it would feel like to move the cursor over "
                 "each target\n(without actually moving), then physically pressing the "
-                "left trigger when finished."
+                "left trigger when finished.\n\nPlease keep your thumb resting on the "
+                "right stick."
             ),
             "CC": (
                 "For this next set of trials, please respond to targets by simply "
@@ -184,7 +185,7 @@ class MotorMapping(klibs.Experiment):
         self.evm.register_ticket(['target_on', self.target_onset])
         self.evm.register_ticket(['timeout', self.target_onset + 15000])
 
-        # Set mouse to screen centre, fill screen, wait for input
+        # Set mouse to screen centre & ensure mouse pointer hidden
         mouse_pos(position=P.screen_c)
         hide_cursor()
 
