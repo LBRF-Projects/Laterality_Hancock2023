@@ -186,12 +186,7 @@ class MotorMapping(klibs.Experiment):
 
         # Set mouse to screen centre, fill screen, wait for input
         mouse_pos(position=P.screen_c)
-        #if P.trial_number > 1:
-        #    msg = message("Press any button to continue.", blit_txt=False)
-        #    fill(MIDGREY)
-        #    blit(msg, 5, P.screen_c)
-        #    flip()
-        #    wait_for_input(self.gamepad)
+        hide_cursor()
 
 
     def trial(self):
