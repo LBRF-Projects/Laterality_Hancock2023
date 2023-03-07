@@ -239,7 +239,7 @@ class MotorMapping(klibs.Experiment):
                 if not initial_angle and px_to_deg(cursor_movement) > 0.1:
                     # Wait at least 50 ms after first movement before calculating angle
                     # (otherwise we get lots of 270s due to no y-axis change)
-                    if input_time - (target_on + movement_rt) < 0.05:
+                    if input_time - (target_on + movement_rt) > 0.05:
                         initial_angle = vector_angle(P.screen_c, cursor_pos)
 
             # Detect/handle different types of trial error
