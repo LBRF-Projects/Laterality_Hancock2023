@@ -41,8 +41,11 @@ class MotorMapping(klibs.Experiment):
     def setup(self):
 
         # Prior to starting the task, run through the KVIQ
+        handedness = self.db.select(
+            'participants', columns=['handedness'], where={'id': P.participant_id}
+        )[0][0]
         self.txtm.add_style('title', '0.75deg')
-        kviq = KVIQ()
+        kviq = KVIQ(handedness == "l")
         responses = kviq.run()
         for movement, dat in responses.items():
             dat['participant_id'] = P.participant_id
