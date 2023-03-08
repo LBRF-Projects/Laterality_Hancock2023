@@ -1,3 +1,5 @@
+import re
+
 from klibs import P
 from klibs.KLTime import Stopwatch
 from klibs.KLEventQueue import flush, pump
@@ -104,10 +106,10 @@ kviq_movements = {
     },
     'Thumb-Fingers Opposition': {
         '3rd_sub': {'tap': 'tapping', 'your': 'their'},
-        'start_pos': "with your left hand\nraised and your palm facing upwards.",
+        'start_pos': "with your right hand\nraised and your palm facing upwards.",
         'desc': (
-            "tap your thumb to each finger on your left hand, starting with the pinkie "
-            "and moving inward."
+            "tap your thumb to each finger on your right hand, starting with the "
+            "pinkie and moving inward."
         ),
     },
     'Forward Trunk Flexion': {
@@ -122,7 +124,7 @@ kviq_movements = {
         '3rd_sub': {'move': 'moving', 'your': 'their'},
         'start_pos': "with your\nfeet and knees together.",
         'desc': (
-            "move your left leg away from your other leg and then return to your "
+            "move your right leg away from your other leg and then return to your "
             "original position, keeping your knees bent."
         ),
     },
@@ -213,6 +215,13 @@ def demo_msg(msgs, extras=None, wait=0.1, resp=True, spacing=None, width=None):
             break
 
 
+def swap_laterality(txt):
+    # Swaps left/right in a given string of text
+    txt = re.sub(r"(\s)right([\s\.,])", "\1left\2", txt)
+    txt = re.sub(r"(\s)left([\s\.,])", "\1right\2", txt)
+    return txt
+
+
 
 class KVIQ(object):
 
@@ -255,14 +264,14 @@ class KVIQ(object):
     def _collect_movement(self, info):
         # Generate 1st and 3rd-person movement descriptions
         left_h = self.left_handed
-        desc_1st = info['desc'].replace('left', 'right') if left_h else info['desc']
+        desc_1st = swap_laterality(info['desc']) if left_h else info['desc']
         desc_3rd = desc_1st
         for word, replacement in info['3rd_sub'].items():
             desc_3rd = desc_3rd.replace(word, replacement)
 
         # Explain the movement and starting position
         if left_h:
-            info['start_pos'] = info['start_pos'].replace('left', 'right')
+            info['start_pos'] = swap_laterality(info['start_pos'])
         info = [
             start_pos_prefix + info['start_pos'],
             movement_prefix + desc_1st + "\n",
