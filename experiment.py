@@ -84,6 +84,8 @@ class MotorMapping(klibs.Experiment):
         self.txtm.add_style('debug', '0.3deg')
 
         # Define error messages for the task
+        dominant = "left" if self.handedness == "l" else "right"
+        nondominant = "left" if self.handedness == "l" else "right"
         err_txt = {
             "too_soon": (
                 "Too soon!\nPlease wait for the target to appear before responding."
@@ -98,6 +100,16 @@ class MotorMapping(klibs.Experiment):
                 "Joystick moved!\n"
                 "Please pull the trigger as soon as you see the target, without\n"
                 "moving the cursor."
+            ),
+            "wrong_hand": (
+                "Wrong hand!\n"
+                f"Please use the {dominant} stick to control the task when the cursor "
+                "is red."
+            ),
+            "wrong_hand_nd": (
+                "Wrong hand!\n"
+                f"Please use the {nondominant} stick to control the task when the "
+                "cursor is blue."
             ),
             "continue": "Press any button to continue.",
         }
@@ -264,9 +276,15 @@ class MotorMapping(klibs.Experiment):
                     if input_time - (target_on + movement_rt) > 0.05:
                         initial_angle = vector_angle(P.screen_c, cursor_pos)
 
+            # Check other joystick for movement if in test block
+            other_stick_movement = 0.0
+            if self.phase == "test":
+                jx2, jy2 = self.get_stick_position(not self.left_hand)
+                dist_raw = linear_dist((jx2, jy2), (0, 0))
+                other_stick_movement = dist_raw * self.target_dist_max
+
             # Detect/handle different types of trial error
             err = "NA"
-            # TODO: Add error if other stick moved (please use dom hand when red/nd when blue)
             if cursor_movement > self.cursor_size:
                 if self.trial_type == "MI":
                     err = "stick_mi"
@@ -274,6 +292,8 @@ class MotorMapping(klibs.Experiment):
                     err = "stick_cc"
                 elif self.trial_type == "PP" and not target_on:
                     err = "too_soon"
+            elif other_stick_movement > self.cursor_size:
+                err = "wrong_hand" if self.dominant else "wrong_hand_nd"
             if self.evm.before('target_on'):
                 if not triggers_released:
                     err = "too_soon"
