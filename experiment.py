@@ -3,7 +3,8 @@
 __author__ = "Austin Hurst"
 
 from math import sqrt
-from random import randrange, choice
+from copy import copy
+from random import randrange, choice, shuffle
 from ctypes import c_int, byref
 
 import sdl2
@@ -30,6 +31,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 MIDGREY = (128, 128, 128)
 TRANSLUCENT_RED = (255, 0, 0, 96)
+TRANSLUCENT_BLUE = (0, 0, 255, 96)
 
 # Define constants for working with gamepad data
 AXIS_MAX = 32768
@@ -41,16 +43,16 @@ class MotorMapping(klibs.Experiment):
     def setup(self):
 
         # Prior to starting the task, run through the KVIQ
-        handedness = self.db.select(
+        self.handedness = self.db.select(
             'participants', columns=['handedness'], where={'id': P.participant_id}
         )[0][0]
         self.txtm.add_style('title', '0.75deg')
-        kviq = KVIQ(handedness == "l")
+        kviq = KVIQ(self.handedness == "l")
         responses = kviq.run()
         for movement, dat in responses.items():
             dat['participant_id'] = P.participant_id
             dat['movement'] = movement
-            self.db.insert(dat, table='kviq')
+            self.db.insert(dat, table='kviq') 
 
         # Initialize stimulus sizes and layout
         screen_h_deg = (P.screen_y / 2.0) / deg_to_px(1.0)
@@ -65,6 +67,7 @@ class MotorMapping(klibs.Experiment):
 
         # Initialize task stimuli
         self.cursor = kld.Ellipse(self.cursor_size, fill=TRANSLUCENT_RED)
+        self.cursor_nd = kld.Ellipse(self.cursor_size, fill=TRANSLUCENT_BLUE)
         self.target = kld.Ellipse(self.target_size, fill=WHITE)
         self.fixation = kld.FixationCross(
             fixation_size, fixation_thickness, rotation=45, fill=WHITE
@@ -162,6 +165,17 @@ class MotorMapping(klibs.Experiment):
             self.trial_type = "PP"
             block_msg = block_msgs["PP"] + "\n\n" + inverted_msg
 
+        # Generate sequence of hands to use for each trial
+        self.dominant_hand = []
+        if self.phase == "test":
+            # Ensure there are 2 trials w/ each hand in every group of 4 trials
+            subseq = [True, True, False, False]
+            while len(self.dominant_hand) < P.trials_per_block:
+                shuffle(subseq)
+                self.dominant_hand += subseq
+        else:
+            self.dominant_hand = [True] * P.trials_per_block
+
         # Show block start message
         msg = message(block_msg, blit_txt=False, align="center")
         msg2 = message("Press any button to start.", blit_txt=False)
@@ -183,6 +197,10 @@ class MotorMapping(klibs.Experiment):
         self.target_dist = randrange(self.target_dist_min, self.target_dist_max)
         self.target_loc = vector_to_pos(P.screen_c, self.target_dist, self.target_angle)
         self.target_onset = randrange(1000, 3000, 100)
+
+        # Determine hand to use for trial
+        self.dominant = self.dominant_hand.pop()
+        self.left_hand = (self.handedness == "l") == self.dominant
 
         # Add timecourse of events to EventManager
         self.evm.register_ticket(['target_on', self.target_onset])
@@ -207,9 +225,10 @@ class MotorMapping(klibs.Experiment):
         mod_x, mod_y = P.input_mappings[self.joystick_map]
 
         # Initialize trial stimuli
+        cursor = self.cursor if self.dominant else self.cursor_nd
         fill(MIDGREY)
         blit(self.fixation, 5, P.screen_c)
-        blit(self.cursor, 5, P.screen_c)
+        blit(cursor, 5, P.screen_c)
         flip()
 
         target_on = None
@@ -224,7 +243,7 @@ class MotorMapping(klibs.Experiment):
 
             # Filter, standardize, and possibly invert the axis & trigger data
             lt, rt = self.get_triggers()
-            jx, jy = self.get_stick_position()
+            jx, jy = self.get_stick_position(self.left_hand)
             input_time = precise_time()
             cursor_pos = (
                 P.screen_c[0] + int(jx * self.target_dist_max * mod_x),
@@ -247,6 +266,7 @@ class MotorMapping(klibs.Experiment):
 
             # Detect/handle different types of trial error
             err = "NA"
+            # TODO: Add error if other stick moved (please use dom hand when red/nd when blue)
             if cursor_movement > self.cursor_size:
                 if self.trial_type == "MI":
                     err = "stick_mi"
@@ -294,7 +314,7 @@ class MotorMapping(klibs.Experiment):
             blit(self.fixation, 5, P.screen_c)
             if self.evm.after('target_on'):
                 blit(self.target, 5, self.target_loc)
-            blit(self.cursor, 5, cursor_pos)
+            blit(cursor, 5, cursor_pos)
             #if P.development_mode:
             #    self.show_gamepad_debug()
             flip()
@@ -352,6 +372,7 @@ class MotorMapping(klibs.Experiment):
             "trial_num": P.trial_number,
             "trial_type": self.trial_type,
             "mapping": self.joystick_map,
+            "dominant": self.dominant,
             "target_onset": self.target_onset if target_on else "NA",
             "target_dist": px_to_deg(self.target_dist),
             "target_angle": self.target_angle,
@@ -516,9 +537,12 @@ class MotorMapping(klibs.Experiment):
             flip()
         
     
-    def get_stick_position(self):
+    def get_stick_position(self, left=False):
         if self.gamepad:
-            raw_x, raw_y = self.gamepad.right_stick()
+            if left:
+                raw_x, raw_y = self.gamepad.left_stick()
+            else:
+                raw_x, raw_y = self.gamepad.right_stick()
         else:
             # If no gamepad, approximate joystick with mouse movement
             mouse_x, mouse_y = mouse_pos()

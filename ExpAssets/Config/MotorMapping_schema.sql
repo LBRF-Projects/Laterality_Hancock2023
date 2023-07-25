@@ -58,6 +58,7 @@ CREATE TABLE trials (
     trial_num integer not null,
     trial_type text not null,
     mapping text not null,
+    dominant boolean not null,
     target_onset text not null,
     target_dist float not null,
     target_angle float not null,

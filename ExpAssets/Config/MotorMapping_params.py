@@ -40,10 +40,10 @@ saccadic_motion_threshold = 0.15
 # Experiment Structure
 #########################################
 multi_session_project = False
-trials_per_block = 50
+trials_per_block = 60
 blocks_per_experiment = 2
 table_defaults = {}
-conditions = ['PP', 'MI', 'CC']
+conditions = ['PP', 'MI']
 default_condition = 'PP'
 
 #########################################
@@ -72,7 +72,7 @@ input_mappings = {
     'inverted_x': (-1, 1),
     'inverted_y': (1, -1),
 }
-training_mapping = 'backwards'
+training_mapping = 'inverted_x'
 test_mapping = 'inverted_x'
 
 practice_trials = 10
