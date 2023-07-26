@@ -85,7 +85,7 @@ class MotorMapping(klibs.Experiment):
 
         # Define error messages for the task
         dominant = "left" if self.handedness == "l" else "right"
-        nondominant = "left" if self.handedness == "l" else "right"
+        nondominant = "right" if self.handedness == "l" else "left"
         err_txt = {
             "too_soon": (
                 "Too soon!\nPlease wait for the target to appear before responding."
@@ -128,34 +128,32 @@ class MotorMapping(klibs.Experiment):
         # Hide mouse cursor if not already hidden
         hide_cursor()
 
+        # Define block messages
+        dominant = "left" if self.handedness == "l" else "right"
+        nondominant = "right" if self.handedness == "l" else "left"
+        next_msg = "Press any button to start."
         block_msgs = {
             "PP": (
                 "For this next set of trials, please respond to targets physically by\n"
-                "using the gamepad's right stick to move the cursor over them."
+                f"using the gamepad's {dominant} stick to move the cursor over them."
             ),
             "MI": (
                 "For this next set of trials, please respond to targets using *motor "
                 "imagery*,\nimagining what it would feel like to move the cursor over "
                 "each target\n(without actually moving), then physically pressing the "
-                "left trigger when finished.\n\nPlease keep your thumb resting on the "
-                "right stick."
+                f"{nondominant} trigger when finished.\n\nPlease keep your thumb "
+                f"resting on the {dominant} stick."
             ),
             "CC": (
                 "For this next set of trials, please respond to targets by simply "
-                "pressing\nthe left trigger as quickly as possible, without moving the "
-                "cursor."
-            )
-        }
-        inverted_msg = (
-            "Note that for this block, the joystick controls will be different:\n"
-            "The left-right axis has been flipped, such that moving the stick left\n"
-            "or right will have the opposite effect it used to."
-        )
-        direction_map = {
-            'normal': ("up", "up", "right", "right"),
-            'backwards': ("up", "down", "left", "right"),
-            'inverted_x': ("up", "up", "left", "right"),
-            'inverted_y': ("up", "down", "right", "right"),
+                f"pressing\nthe {nondominant} trigger as quickly as possible, without "
+                "moving the cursor."
+            ),
+            "test": (
+                "The colour of the cursor will change randomly between trials, so be "
+                "ready to\nrespond with either stick. Press any button when you are "
+                "ready to begin!"
+            ),
         }
 
         # Handle different phases of the experiment
@@ -175,7 +173,8 @@ class MotorMapping(klibs.Experiment):
         elif self.phase == "test":
             self.joystick_map = P.test_mapping
             self.trial_type = "PP"
-            block_msg = block_msgs["PP"] + "\n\n" + inverted_msg
+            block_msg = block_msgs["test"]
+            self.test_phase_instructions()
 
         # Generate sequence of hands to use for each trial
         self.dominant_hand = []
@@ -458,6 +457,8 @@ class MotorMapping(klibs.Experiment):
             (self.fixation, P.screen_c),
             (self.cursor, P.screen_c),
         ]
+        dominant = "left" if self.handedness == "l" else "right"
+        nondominant = "right" if self.handedness == "l" else "left"
         
         # Actually run through demo
         self.show_demo_text(
@@ -472,14 +473,14 @@ class MotorMapping(klibs.Experiment):
         )
         self.show_demo_text(
             ("Your job will be to quickly move the red cursor over top of the target "
-             "when it appears,\nusing the right stick on the gamepad."),
+             f"when it appears,\nusing the {dominant} stick on the gamepad."),
             [(self.fixation, P.screen_c), (self.target, target_loc),
              (self.cursor, (target_loc[0] + 4, target_loc[1] + 6))]
         )
         self.show_demo_text(
-            ("Once you have moved the cursor over the target, please squeeze the left "
-             "trigger on the \nback of the gamepad to end the trial. You will be shown "
-             "your reaction time."),
+            ("Once you have moved the cursor over the target, please squeeze the "
+             f"{nondominant} trigger on the \nback of the gamepad to end the trial. "
+             "You will be shown your reaction time."),
             [(feedback, P.screen_c)]
         )
         target_dist = (self.target_dist_min + self.target_dist_max) / 2
@@ -502,15 +503,15 @@ class MotorMapping(klibs.Experiment):
             )
             self.show_demo_text(
                 ("Once you have imagined the movement and are over the target (in your "
-                 "mind's eye),\nplease physically squeeze the left trigger to end the "
-                 "trial."),
+                 f"mind's eye),\nplease physically squeeze the {nondominant} trigger "
+                  "to end the trial."),
                 [(feedback, P.screen_c)]
             )
         if P.condition == "CC":
             self.show_demo_text(
                 ("In some parts of the study, instead of moving the cursor to the "
-                "target, you will be\nasked to simply squeeze the left trigger as soon "
-                "as the target appears."),
+                 f"target, you will be\nasked to simply squeeze the {nondominant} "
+                 "trigger as soon as the target appears."),
                 [(self.fixation, P.screen_c), (self.target, target_loc),
                 (self.cursor, P.screen_c)]
             )
@@ -519,6 +520,35 @@ class MotorMapping(klibs.Experiment):
                  "reaction time.\nPlease try to respond as quickly as possible."),
                 [(feedback, P.screen_c)]
             )
+
+
+    def test_phase_instructions(self):
+        # Initialize task stimuli for the demo
+        target_dist = (2 * self.target_dist_min + self.target_dist_max) / 3
+        target_loc = vector_to_pos(P.screen_c, target_dist, 250)
+        dominant = "left" if self.handedness == "l" else "right"
+        nondominant = "right" if self.handedness == "l" else "left"
+
+        self.show_demo_text(
+            ("For this next set of trials, please respond to targets physically using "
+             "the\njoysticks on the gamepad. During this block, the cursor will "
+             "alternate\nbetween red and blue."),
+            [(self.fixation, P.screen_c), (self.cursor, P.screen_c)]
+        )
+        self.show_demo_text(
+            (f"When the cursor is *red*, please use the {dominant} stick to move the "
+             f"cursor to\nthe target and squeeze the {nondominant} trigger to end "
+             "the trial (same as before)."),
+            [(self.fixation, P.screen_c), (self.target, target_loc),
+             (self.cursor, P.screen_c)]
+        )
+        self.show_demo_text(
+            (f"When the cursor is *blue*, please use the *{nondominant}* stick to "
+             f"control the cursor\n(with your other hand) and squeeze the *{dominant}* "
+             "trigger to end the trial."),
+            [(self.fixation, P.screen_c), (self.target, target_loc),
+             (self.cursor_nd, P.screen_c)]
+        )
 
 
     def show_gamepad_debug(self):
