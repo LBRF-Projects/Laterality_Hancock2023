@@ -1,5 +1,3 @@
-import threading
-
 import sdl2
 import sdl2.ext
 
@@ -48,29 +46,25 @@ def get_all_controllers():
     return connected
 
 
-def update_thread(pad, vstick):
-    while (pad._dev != None):
-        pad.update()
-        # Update button states
-        events = pad.get_button_events()
-        for e in events:
-            b = BUTTON_MAP[e.name]
-            sdl2.SDL_JoystickSetVirtualButton(vstick, b, e.state)
-        # Update axis states
-        data = pad.get_data()
-        for d in data:
-            for axis in ALL_AXES:
-                a = AXIS_MAP[axis]
-                value = d[axis + 1]
-                if axis in [AXIS_LEFTY, AXIS_RIGHTY]:
-                    value = -(value + 1)
-                if axis in [AXIS_LT, AXIS_RT]:
-                    value = int(value * 257) - 32768
-                sdl2.SDL_JoystickSetVirtualAxis(vstick, a, value)
-
-
 class Virtual360Controller(GameController):
+    """A GameController implementation for Xbox 360 controllers via pyusb.
 
+    This class is an implementation of the SDL2-based GameController class that
+    parses raw USB packets from Xbox 360 wired controllers and passes them to
+    SDL2 as GameController events. This is necessary to use 360 controllers on
+    modern macOS, which does not natively support 360 controllers and has broken
+    compatibility with the popular 3rd-party driver.
+
+    The key difference in functionality between this class and the regular
+    GameController class is that `self.update()` needs to be called explicitly
+    to pass controller events to SDL2 when processing input (e.g. waiting for a
+    button press event), whereas this happens automatically in the background
+    for controllers supported natively by SDL2.
+
+    Both Windows & Linux have native support for wired 360 controllers in SDL2,
+    so no need to use this class.
+
+    """
     def __init__(self, usb_device):
         self._pad = None
         self._stick = None
@@ -79,7 +73,6 @@ class Virtual360Controller(GameController):
 
         self._usb_dev = usb_device
         self.usb_pad = None
-        self._update_thread = None
 
     def _init_virtual(self):
         n_axes = 6
@@ -93,18 +86,12 @@ class Virtual360Controller(GameController):
         self.usb_pad = py360.Controller360(self._usb_dev)
         self.usb_pad.set_led(LED_OFF)
         GameController.initialize(self)
-        #self._update_thread = threading.Thread(
-        #    target=update_thread, args=(self.usb_pad, self._stick), daemon=True
-        #)
-        #self._update_thread.start()
 
     def close(self):
         self.usb_pad.disconnect()
-        #self._update_thread.join()
         GameController.close(self)
 
     def update(self):
-        #return None
         self.usb_pad.update()
         events = self.usb_pad.get_button_events()
         for e in events:

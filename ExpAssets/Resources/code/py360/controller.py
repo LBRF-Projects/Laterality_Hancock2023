@@ -2,14 +2,16 @@ import os
 
 import usb
 import usb.backend.libusb1
-import libusb_package as usbdll
 
 from .constants import *
 from .parsing import InputPacket, parse_data_packet, get_events
 
-    
-# Configure pyusb to use binary from libusb-package
-usb.backend.libusb1.get_backend(find_library=usbdll.find_library)
+try:
+    # Configure pyusb to use binary from libusb-package, if available
+    import libusb_package as usbdll
+    usb.backend.libusb1.get_backend(find_library=usbdll.find_library)
+except ImportError:
+    pass
 
 
 
