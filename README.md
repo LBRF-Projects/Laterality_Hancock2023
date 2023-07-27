@@ -1,6 +1,6 @@
-# Motor Imagery and Fine Motor Lateralization - Hancock 2023
+# Motor Imagery and Fine Motor Laterality - Hancock 2023
 
-This repository contains the experiment code for a study on how motor imagery affects the laterality of fine-motor learning. The purpose of the task is to measure how well learning on a challenging fine-motor task transfers from one hand to the other, and specifically test whether the *amount* of lateral transfer is affected by how the task is practiced (physically or via motor imagery).
+This repository contains the experiment code for a study on how motor imagery affects the lateralization of fine-motor learning. The purpose of the task is to measure how well learning on a challenging fine-motor task transfers from one hand to the other, and specifically test whether the *amount* of lateral transfer is affected by how the task is practiced (physically or via motor imagery).
 
 ![MotorMapping](task.gif)
 
