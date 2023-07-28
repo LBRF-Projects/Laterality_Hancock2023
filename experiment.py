@@ -315,7 +315,7 @@ class MotorMapping(klibs.Experiment):
                     raise TrialException("Recycling trial!")
 
             # Log continuous cursor x/y data for each frame
-            if target_on and cursor_movement:
+            if target_on and cursor_movement and self.gamepad:
                 # Only log samples where position actually changes (to save space)
                 any_change = (cursor_pos[0] != last_x) or (cursor_pos[1] != last_y)
                 if any_change:
