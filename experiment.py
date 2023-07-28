@@ -46,13 +46,14 @@ class MotorMapping(klibs.Experiment):
         self.handedness = self.db.select(
             'participants', columns=['handedness'], where={'id': P.participant_id}
         )[0][0]
-        self.txtm.add_style('title', '0.75deg')
-        kviq = KVIQ(self.handedness == "l")
-        responses = kviq.run()
-        for movement, dat in responses.items():
-            dat['participant_id'] = P.participant_id
-            dat['movement'] = movement
-            self.db.insert(dat, table='kviq') 
+        if P.run_kviq:
+            self.txtm.add_style('title', '0.75deg')
+            kviq = KVIQ(self.handedness == "l")
+            responses = kviq.run()
+            for movement, dat in responses.items():
+                dat['participant_id'] = P.participant_id
+                dat['movement'] = movement
+                self.db.insert(dat, table='kviq') 
 
         # Initialize stimulus sizes and layout
         screen_h_deg = (P.screen_y / 2.0) / deg_to_px(1.0)
