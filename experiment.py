@@ -210,7 +210,7 @@ class MotorMapping(klibs.Experiment):
         self.target_onset = randrange(1000, 3000, 100)
 
         # Determine hand to use for trial
-        self.dominant = self.dominant_hand.pop()
+        self.dominant = self.dominant_hand[P.trial_number - 1]
         self.left_hand = (self.handedness == "l") == self.dominant
 
         # Add timecourse of events to EventManager
