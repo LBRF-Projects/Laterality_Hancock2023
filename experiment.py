@@ -92,6 +92,9 @@ class MotorMapping(klibs.Experiment):
                 "Too soon!\nPlease wait for the target to appear before responding."
             ),
             "too_slow": "Too slow!\nPlease try to respond faster.",
+            "start_triggers": (
+                "Please fully release the triggers before the start of each trial."
+            ),
             "stick_mi": (
                 "Joystick moved!\n"
                 "Please try to only *imagine* moving the stick over the target\n"
@@ -241,6 +244,7 @@ class MotorMapping(klibs.Experiment):
         flip()
 
         target_on = None
+        first_loop = True
         over_target = False
         while self.evm.before('timeout'):
             q = pump(True)
@@ -291,7 +295,11 @@ class MotorMapping(klibs.Experiment):
                     err = "too_soon"
             elif other_stick_movement > self.cursor_size:
                 err = "wrong_hand" if self.dominant else "wrong_hand_nd"
-            if self.evm.before('target_on'):
+            if first_loop:
+                first_loop = False
+                if not triggers_released:
+                    err = "start_triggers"
+            elif self.evm.before('target_on'):
                 if not triggers_released:
                     err = "too_soon"
 
