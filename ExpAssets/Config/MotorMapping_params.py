@@ -49,10 +49,9 @@ default_condition = 'PP'
 #########################################
 # Development Mode Settings
 #########################################
-dm_auto_threshold = True
 dm_trial_show_mouse = False
 dm_ignore_local_overrides = False
-dm_show_gaze_dot = True
+show_gamepad_debug = False
 
 #########################################
 # Data Export Settings
