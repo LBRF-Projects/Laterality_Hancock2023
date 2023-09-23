@@ -203,9 +203,6 @@ class MotorMapping(klibs.Experiment):
 
         # Generate trial factors
         self.target_angle = randrange(0, 360, 1)
-        if self.phase == "test":
-            # Don't do targets in 10° above or below target in last block
-            self.target_angle = choice([randrange(5, 175, 1), randrange(185, 355, 1)])
         self.target_dist = randrange(self.target_dist_min, self.target_dist_max)
         self.target_loc = vector_to_pos(P.screen_c, self.target_dist, self.target_angle)
         self.target_onset = randrange(1000, 3000, 100)
