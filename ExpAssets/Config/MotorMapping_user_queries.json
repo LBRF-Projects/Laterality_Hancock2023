@@ -81,6 +81,25 @@
             },
             "anonymous_value": -1,
             "active": true
+        },
+        {
+            "title": "game_skill",
+            "database_field": "game_skill",
+            "query": "On a scale from 1 to 10, how would you rate your skill at playing video\ngames with a gamepad?",
+            "accepted": null,
+            "allow_null": false,
+            "format": {
+                "type": "int",
+                "styles": "default",
+                "positions": "default",
+                "password": false,
+                "range": [1, 10],
+                "case_sensitive": null,
+                "accept_as_true": null,
+                "action": null
+            },
+            "anonymous_value": -1,
+            "active": true
         }
     ],
     "experimental": null
