@@ -216,8 +216,8 @@ class MotorMapping(klibs.Experiment):
         self.left_hand = (self.handedness == "l") == self.dominant
 
         # Add timecourse of events to EventManager
-        self.evm.register_ticket(['target_on', self.target_onset])
-        self.evm.register_ticket(['timeout', self.target_onset + 15000])
+        self.evm.add_event('target_on', onset=self.target_onset)
+        self.evm.add_event('timeout', onset=15000, after='target_on')
 
         # Set mouse to screen centre & ensure mouse pointer hidden
         mouse_pos(position=P.screen_c)

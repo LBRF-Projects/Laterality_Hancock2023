@@ -1,3 +1,5 @@
-from klibs.KLIndependentVariable import IndependentVariableSet
+from klibs.KLStructure import FactorSet
 
-MotorMapping_ind_vars = IndependentVariableSet()
+exp_factors = FactorSet({
+    # No categorical trial factors for this task
+})
