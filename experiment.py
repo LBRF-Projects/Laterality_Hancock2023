@@ -205,6 +205,14 @@ class MotorMapping(klibs.Experiment):
 
     def trial_prep(self):
 
+        # If halfway through training or test block, do block break
+        if not P.practicing and (P.trial_number - 1) == int(P.trials_per_block / 2):
+            self.show_demo_text(
+                ("Take a short break! Whenever you're ready, press any button to\n"
+                 "resume the task."),
+                stim_set=[], msg_y=int(0.45 * P.screen_c[1])
+            )
+
         # Generate trial factors
         self.target_angle = randrange(0, 360, 1)
         self.target_dist = randrange(self.target_dist_min, self.target_dist_max)
