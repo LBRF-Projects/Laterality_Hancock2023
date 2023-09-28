@@ -300,7 +300,7 @@ class MotorMapping(klibs.Experiment):
                 first_loop = False
                 if not triggers_released:
                     err = "start_triggers"
-            elif self.evm.before('target_on'):
+            elif not target_on:
                 if not triggers_released:
                     err = "too_soon"
 
@@ -312,14 +312,8 @@ class MotorMapping(klibs.Experiment):
                 blit(self.errs['continue'], 5, self.lower_middle)
                 flip()
                 wait_for_input(self.gamepad)
-                if target_on:
-                    # NOTE: Do we want to recycle stick MI/CC errors as well?
-                    # If so, should we still record when people make these errors
-                    # regardless?
-                    break
-                else:
-                    # If target hasn't appeared yet, recycle the trial
-                    raise TrialException("Recycling trial!")
+                # If error happens early in the trial, recycle
+                raise TrialException("Recycling trial!")
 
             # Log continuous cursor x/y data for each frame
             if target_on and cursor_movement and self.gamepad:
