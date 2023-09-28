@@ -10,6 +10,7 @@ from klibs.KLUtilities import deg_to_px
 from klibs.KLGraphics import fill, blit, flip, NumpySurface
 from klibs.KLCommunication import message
 
+from sdl_utils import get_key_state
 from InterfaceExtras import RatingScale
 
 
@@ -194,7 +195,7 @@ def render_text(msgs, spacing=None, align="center", width=None):
     return surf
 
 
-def demo_msg(msgs, extras=None, wait=0.1, resp=True, spacing=None, width=None):
+def demo_msg(msgs, extras=None, wait=0.1, spacing=None, width=None, mouse=True):
 
     if not extras:
         extras = []
@@ -208,10 +209,22 @@ def demo_msg(msgs, extras=None, wait=0.1, resp=True, spacing=None, width=None):
 
     if wait:
         smart_sleep(wait * 1000)
+    
+    key_released = False
     flush()
-    while resp:
+    while True:
         q = pump(True)
-        if key_pressed('space', queue=q) or mouse_clicked(queue=q):
+        # Handle keyboard input
+        if not key_released:
+            # Ignore repeated keydown events from held down space bar by requiring key
+            # be 'up' on at least one loop before a response can be registered
+            if get_key_state('space') == 0:
+                key_released = True
+        else:
+            if key_pressed('space', queue=q):
+                break
+        # Handle mouse input
+        if mouse and mouse_clicked(queue=q):
             break
 
 
@@ -301,12 +314,13 @@ class KVIQ(object):
         # Present the initial instructions and wait for input
         instructions[-1] = instructions[-1] + "\n"
         instructions += ["Press [space] to begin."]
-        demo_msg(instructions, self.extras, wait=False, width=int(P.screen_x * 0.65))
+        msg_w = int(P.screen_x * 0.65)
+        demo_msg(instructions, self.extras, wait=False, width=msg_w, mouse=False)
 
         # Once started, remove 'press space to start' prompt and wait for second
         # space bar press to end.
         timer = Stopwatch(start=True)
-        demo_msg("Press [space] when finished.", wait=0.5)
+        demo_msg("Press [space] when finished.", wait=0.5, mouse=False)
         timer.pause()
 
         # On second press, return movement duration
@@ -334,9 +348,18 @@ class KVIQ(object):
         response = 0
         if demo:
             show_cursor()
+            key_released = False
             while True:
                 q = pump(True)
-                if key_pressed(' ', queue=q) or mouse_clicked(queue=q):
+                if not key_released:
+                    # Ignore repeated keydown events from held down space bar by
+                    # requring key must be 'up' on at least one loop before response
+                    if get_key_state('space') == 0:
+                        key_released = True
+                else:
+                    if key_pressed('space', queue=q):
+                        break
+                if mouse_clicked(queue=q):
                     break
                 fill()
                 scale._render()
