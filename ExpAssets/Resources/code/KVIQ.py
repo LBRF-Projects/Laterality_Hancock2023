@@ -8,6 +8,7 @@ from klibs.KLUserInterface import (
 )
 from klibs.KLUtilities import deg_to_px
 from klibs.KLGraphics import fill, blit, flip, NumpySurface
+from klibs.KLText import add_text_style
 from klibs.KLCommunication import message
 
 from sdl_utils import get_key_state
@@ -175,7 +176,7 @@ def render_text(msgs, spacing=None, align="center", width=None):
         if len(rendered) > 0:
             total_height += spacing
         # Render the message and add its height to the total
-        chunk = message(msg, blit_txt=False, align=align, wrap_width=width)
+        chunk = message(msg, align=align, wrap_width=width)
         total_height += chunk.height
         rendered.append(chunk)
 
@@ -241,6 +242,7 @@ class KVIQ(object):
     def __init__(self, left_handed=False):
         self.left_handed = left_handed
         self.extras = [] # Extra stimuli for demo_msg
+        add_text_style('title', '0.75deg')
 
 
     def run(self):
@@ -255,7 +257,7 @@ class KVIQ(object):
 
     def _update_title(self, movement):
         loc = (P.screen_c[0], int(P.screen_y * 0.15))
-        title = message(movement, style="title", blit_txt=False)
+        title = message(movement, style="title")
         self.extras = [{'img': title, 'reg': 8, 'loc': loc}] 
 
 
@@ -336,7 +338,7 @@ class KVIQ(object):
         else:
             prompt_adj = "clear"
             choices = visual_ratings
-        prompt = message(prompt_txt.format(prompt_adj), blit_txt=False)
+        prompt = message(prompt_txt.format(prompt_adj))
 
         # Create the rating prompt for the current imagery type
         scale_loc = (P.screen_c[0], int(P.screen_y * 0.3))

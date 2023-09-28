@@ -185,7 +185,7 @@ class LikertType(BoundaryInspector):
 
         numlist = []
         for num in self.range:
-            num_txt = message("{0}".format(num), aes.fontstyle, blit_txt=False)
+            num_txt = message("{0}".format(num), aes.fontstyle)
             numlist.append((num, num_txt))
         self.numbers = dict(numlist)
 
@@ -376,7 +376,7 @@ class ThoughtProbe(BoundaryInspector):
             random.shuffle(order)
         self.order = order
 
-        self.q_pad = 0.8 * message("ABCDEFG", "default", blit_txt=False).height
+        self.q_pad = 0.8 * message("ABCDEFG", "default").height
         x1 = origin[0] - (self.width // 2)
         x2 = origin[0] + (self.width // 2)     
         y1 = origin[1] + self.q.height + self.q_pad * 2
@@ -385,7 +385,7 @@ class ThoughtProbe(BoundaryInspector):
         self.answers = {}
         max_width = 0
         for a in self.order:
-            txt = message(choices[a], "default", blit_txt=False)
+            txt = message(choices[a], "default")
             if txt.width > max_width:
                 max_width = txt.width
             hover_height = txt.height + self.q_pad
@@ -450,7 +450,7 @@ class RatingScale(ThoughtProbe):
     # we allow for keypress responses as well as click responses
 
     def _collect(self):
-        q = pump()
+        q = pump(True)
         # Check for clicks on response options
         clicks = get_clicks(released=True, queue=q)
         for click in clicks:
