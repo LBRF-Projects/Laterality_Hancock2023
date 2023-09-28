@@ -7,7 +7,7 @@ verify_ssl = true
 pylint = "*"
 
 [packages]
-klibs = {git = "https://github.com/a-hurst/klibs.git", ref = "b18cd940ac4317c9ee72d30839e8311914d95e37"}
+klibs = {file = "https://github.com/a-hurst/klibs/releases/download/0.7.7b1/klibs.tar.gz"}
 pyusb = "*"
 libusb_package = "*"
 

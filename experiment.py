@@ -369,23 +369,24 @@ class MotorMapping(klibs.Experiment):
         if response_rt:
             rt_sec = "{:.3f}".format(response_rt)
             feedback = message(rt_sec, blit_txt=False)
-            self.show_feedback(feedback, duration=1.0)
+            self.show_feedback(feedback, duration=1.5)
         elif err == "NA":
             feedback = self.errs['too_slow']
-            self.show_feedback(feedback, duration=2.0)
+            self.show_feedback(feedback, duration=2.5)
 
         # Write raw axis data to database
         if err == "NA":
+            rows = []
             for timestamp, stick_x, stick_y in axis_data:
-                dat = {
+                rows.append({
                     'participant_id': P.participant_id,
                     'block_num': P.block_number,
                     'trial_num': P.trial_number,
                     'time': timestamp,
                     'stick_x': stick_x,
                     'stick_y': stick_y,
-                }
-                self.db.insert(dat, table='gamepad')
+                })
+            self.db.insert(rows, table='gamepad')
 
         return {
             "block_num": P.block_number,
