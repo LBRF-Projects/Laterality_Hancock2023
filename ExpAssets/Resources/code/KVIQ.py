@@ -10,7 +10,7 @@ from klibs.KLUtilities import deg_to_px
 from klibs.KLGraphics import fill, blit, flip, NumpySurface
 from klibs.KLCommunication import message
 
-from InterfaceExtras import Button, LikertType, ThoughtProbe, Aesthetics
+from InterfaceExtras import RatingScale
 
 
 # KVIQ-10 elements
@@ -326,7 +326,7 @@ class KVIQ(object):
 
         # Create the rating prompt for the current imagery type
         scale_loc = (P.screen_c[0], int(P.screen_y * 0.3))
-        scale = ThoughtProbe(
+        scale = RatingScale(
             choices, prompt, scale_loc, order = ['5', '4', '3', '2', '1']
         )
 

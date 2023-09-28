@@ -443,3 +443,25 @@ class ThoughtProbe(BoundaryInspector):
         rt = time.time() - onset
         hide_mouse_cursor()
         return Response(response, rt)
+
+
+class RatingScale(ThoughtProbe):
+    # Special case of ThoughtProbe where all responses correspond to numbers, so
+    # we allow for keypress responses as well as click responses
+
+    def _collect(self):
+        q = pump()
+        # Check for clicks on response options
+        clicks = get_clicks(released=True, queue=q)
+        for click in clicks:
+            response = self.which_boundary(click)
+            if response != None:
+                return response
+        # Check for keypress events corresponding to rating scale options
+        for event in q:
+            if event.type == sdl2.SDL_KEYDOWN:
+                keyname = sdl2.SDL_GetKeyName(event.key.keysym.sym)
+                response = keyname.decode("utf-8").replace("Keypad ", "")
+                if response in self.order:
+                    return response
+        return None
