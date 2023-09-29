@@ -493,6 +493,17 @@ class MotorMapping(klibs.Experiment):
              "You will be shown your reaction time."),
             [(feedback, P.screen_c)]
         )
+        wrong_direction = (
+            P.screen_c[0] + self.cursor_size * 2, P.screen_c[1] + self.cursor_size
+        )
+        self.show_demo_text(
+            ("To make the task more challenging, 'left' and 'right' on the controller "
+             "have been reversed.\nThis means moving the joystick *left* will move "
+             "the cursor to the *right* (and vice versa).\nThis may take a while to "
+             "get used to."),
+            [(self.fixation, P.screen_c), (self.target, target_loc),
+             (self.cursor, wrong_direction)]
+        )
         target_dist = (self.target_dist_min + self.target_dist_max) / 2
         target_loc = vector_to_pos(P.screen_c, target_dist, 165)
         if P.condition == "MI":
