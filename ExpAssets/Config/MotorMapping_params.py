@@ -43,7 +43,7 @@ multi_session_project = False
 trials_per_block = 80
 blocks_per_experiment = 2
 table_defaults = {}
-conditions = ['PP', 'MI']
+conditions = ['PP', 'MI', 'CC']
 default_condition = 'PP'
 
 #########################################
