@@ -67,6 +67,7 @@ CREATE TABLE trials (
     contact_rt text not null,
     response_rt text not null,
     initial_angle text not null,
+    resp_trigger text not null,
     err text not null,
     target_x integer not null,
     target_y integer not null

@@ -241,6 +241,7 @@ class MotorMapping(klibs.Experiment):
         initial_angle = None
         axis_data = []
         last_x, last_y = (-1, -1)
+        resp_trigger = "NA"
 
         # Get joystick mapping for the trial
         mod_x, mod_y = P.input_mappings[self.joystick_map]
@@ -371,6 +372,7 @@ class MotorMapping(klibs.Experiment):
             can_respond = over_target or self.trial_type != "PP"
             if can_respond and (lt > 0.5 or rt > 0.5):
                 response_rt = precise_time() - target_on
+                resp_trigger = "left" if lt > rt else "right"
                 break
 
         # Show RT feedback for 1 second (may remove this)
@@ -409,6 +411,7 @@ class MotorMapping(klibs.Experiment):
             "contact_rt": "NA" if contact_rt is None else contact_rt * 1000,
             "response_rt": "NA" if response_rt is None else response_rt * 1000,
             "initial_angle": "NA" if initial_angle is None else initial_angle,
+            "resp_trigger": resp_trigger,
             "err": err,
             "target_x": self.target_loc[0],
             "target_y": self.target_loc[1],
