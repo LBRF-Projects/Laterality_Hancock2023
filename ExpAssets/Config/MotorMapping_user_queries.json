@@ -85,7 +85,7 @@
         {
             "title": "game_skill",
             "database_field": "game_skill",
-            "query": "On a scale from 1 to 10, how would you rate your skill at playing video\ngames with a game controller?",
+            "query": "On a scale from 1 to 10, how would you rate your skill at playing video games with\na game controller? (1 - No Experience, 10 - Highly Skilled)",
             "accepted": null,
             "allow_null": false,
             "format": {
