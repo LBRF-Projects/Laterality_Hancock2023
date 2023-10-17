@@ -8,6 +8,7 @@ from random import randrange, choice, shuffle
 from ctypes import c_int, byref
 
 import sdl2
+import numpy as np
 import klibs
 from klibs import P
 from klibs.KLExceptions import TrialException
@@ -126,6 +127,19 @@ class MotorMapping(klibs.Experiment):
         # Insert practice block
         self.insert_practice_block(1, trial_counts=P.practice_trials)
 
+        # Pre-generate target locations using a fixed seed
+        self.target_angles = []
+        self.target_dists = []
+        n = P.trials_per_block
+        dist_range = self.target_dist_max - self.target_dist_min
+        rng = np.random.default_rng(seed=530453080)
+        for block in range(P.blocks_per_experiment):
+            angles = np.floor(rng.random(n) * 360)
+            dists = self.target_dist_min + rng.random(n) * dist_range
+            self.target_angles.append(angles)
+            self.target_dists.append(dists)
+        self.random_target = False
+
         # Run a visual demo explaining the task
         self.task_demo()
 
@@ -214,14 +228,23 @@ class MotorMapping(klibs.Experiment):
                 stim_set=[], msg_y=int(0.45 * P.screen_y)
             )
 
-        # Generate trial factors
-        self.target_angle = randrange(0, 360, 1)
-        self.target_dist = randrange(self.target_dist_min, self.target_dist_max)
+        # Generate/retrieve trial factors
+        block_idx = P.block_number - 1
+        trial_idx = P.trial_number - 1
+        if self.random_target:
+            # Use random location for recycled trials so target loc isn't repeated
+            self.target_angle = randrange(0, 360, 1)
+            self.target_dist = randrange(self.target_dist_min, self.target_dist_max)
+            self.random_target = False
+        else:
+            # Otherwise, use location from fixed pre-generated list
+            self.target_angle = self.target_angles[block_idx][trial_idx]
+            self.target_dist = self.target_dists[block_idx][trial_idx]
         self.target_loc = vector_to_pos(P.screen_c, self.target_dist, self.target_angle)
         self.target_onset = randrange(1000, 3000, 100)
 
         # Determine hand to use for trial
-        self.dominant = self.dominant_hand[P.trial_number - 1]
+        self.dominant = self.dominant_hand[trial_idx]
         self.left_hand = (self.handedness == "l") == self.dominant
 
         # Add timecourse of events to EventManager
@@ -323,6 +346,9 @@ class MotorMapping(klibs.Experiment):
                 flip()
                 wait_for_input(self.gamepad)
                 # If error happens early in the trial, recycle
+                if target_on:
+                    # Only generate new target loc if target was shown before error
+                    self.random_target = True
                 raise TrialException("Recycling trial!")
 
             # Log continuous cursor x/y data for each frame
