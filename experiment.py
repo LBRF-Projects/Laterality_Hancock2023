@@ -62,7 +62,8 @@ class MotorMapping(klibs.Experiment):
         self.cursor_size = deg_to_px(P.cursor_size)
         self.target_size = deg_to_px(0.3)
         self.target_dist_min = deg_to_px(3.0)
-        self.target_dist_max = deg_to_px(8.0)
+        self.target_dist_max = deg_to_px(7.0)
+        self.cursor_dist_max = deg_to_px(8.0)
         self.lower_middle = (P.screen_c[0], int(P.screen_y * 0.75))
         self.msg_loc = (P.screen_c[0], int(P.screen_y * 0.4))
 
@@ -269,8 +270,8 @@ class MotorMapping(klibs.Experiment):
             jx, jy = self.get_stick_position(self.left_hand)
             input_time = precise_time()
             cursor_pos = (
-                P.screen_c[0] + int(jx * self.target_dist_max * mod_x),
-                P.screen_c[1] + int(jy * self.target_dist_max * mod_y)
+                P.screen_c[0] + int(jx * self.cursor_dist_max * mod_x),
+                P.screen_c[1] + int(jy * self.cursor_dist_max * mod_y)
             )
 
             # Handle input based on trial type and trials phase
@@ -292,7 +293,7 @@ class MotorMapping(klibs.Experiment):
             if self.phase == "test":
                 jx2, jy2 = self.get_stick_position(not self.left_hand)
                 dist_raw = linear_dist((jx2, jy2), (0, 0))
-                other_stick_movement = dist_raw * self.target_dist_max
+                other_stick_movement = dist_raw * self.cursor_dist_max
 
             # Detect/handle different types of trial error
             err = "NA"
@@ -620,7 +621,7 @@ class MotorMapping(klibs.Experiment):
         else:
             # If no gamepad, approximate joystick with mouse movement
             mouse_x, mouse_y = mouse_pos()
-            scale_factor = AXIS_MAX / self.target_dist_max
+            scale_factor = AXIS_MAX / self.cursor_dist_max
             raw_x = int((mouse_x - P.screen_c[0]) * scale_factor)
             raw_y = int((mouse_y - P.screen_c[1]) * scale_factor)
 
