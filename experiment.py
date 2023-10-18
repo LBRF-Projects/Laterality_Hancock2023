@@ -407,7 +407,11 @@ class MotorMapping(klibs.Experiment):
         if response_rt:
             rt_sec = "{:.3f}".format(response_rt)
             feedback = message(rt_sec)
-            self.show_feedback(feedback, duration=1.5)
+            if self.trial_type == "CC":
+                # Longer feedback for CC to better match PP/MI trial durations
+                self.show_feedback(feedback, duration=2.2)
+            else:
+                self.show_feedback(feedback, duration=1.5)
         elif err == "NA":
             feedback = self.errs['too_slow']
             self.show_feedback(feedback, duration=2.5)
