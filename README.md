@@ -1,6 +1,6 @@
 # Motor Imagery and Fine Motor Laterality - Hancock 2023
 
-This repository contains the experiment code for a study on how motor imagery affects the lateralization of fine-motor learning. The purpose of the task is to measure how well learning on a challenging fine-motor task transfers from one hand to the other, and specifically test whether the *amount* of lateral transfer is affected by how the task is practiced (physically or via motor imagery).
+This repository contains the experiment code for a study on how motor imagery affects the lateralization of fine-motor learning. The purpose of the task is to measure how well learning on a challenging fine-motor task transfers from one hand to the other, and specifically test whether the *amount* of lateral transfer is affected by how the task is practiced (physically, via motor imagery, or performing an unrelated control task).
 
 ![MotorMapping](task.gif)
 
@@ -9,7 +9,7 @@ On each trial, a target will appear on the screen at a random distance and angle
 The experiment has three phases: a practice phase, a training phase, and a testing phase:
 
 * The **practice phase** is the same for all particpants (a small number of physical practice trials to familiarize people with the task). For all trials, the cursor is controlled with the participant's dominant hand.
-* The **training phase** differs depending on the experiment condition: some people continue to practice the task physically, and some are asked to practice the task using motor imagery. Like the first phase, the cursor is controlled on all trials by the participant's dominant hand.
+* The **training phase** differs depending on the experiment condition: some people continue to practice the task physically, some are asked to practice the task using motor imagery, and others are asked to simply squeeze the trigger as soon as a target appears (control task). Like the first phase, the cursor is controlled on all trials by the participant's dominant hand.
 * During the **testing phase**, all participants perform the task physically, except that the cursor now alternates semi-randomly between red and blue. When the cursor is *red*, the cursor is controlled with the participant's dominant hand like before. When the cursor is *blue*, the cursor is controlled with the *opposite* stick using the participant's non-dominant hand. 
 
 Reaction times to targets are recorded, allowing the degree and duration of the mapping-change impairment in the final block to be measured and compared across groups.
@@ -25,7 +25,7 @@ To use the task with a gamepad (as intended), you will also need a USB or wirele
 
 ### Installation
 
-To download a copy of the task, you can grab a .zip archive of the current code [here](https://github.com/LBRF-Projects/Laterality_Hancock2023/archive/refs/heads/main.zip). Alternatively, you can clone this repository to your computer using Git by opening a terminal in your destination folder and running the following command:
+To download a copy of the task, you can grab a .zip archive of the current code [here](https://github.com/LBRF-Projects/Laterality_Hancock2023/archive/refs/heads/laterality.zip). Alternatively, you can clone this repository to your computer using Git by opening a terminal in your destination folder and running the following command:
 
 ```
 git clone https://github.com/LBRF-Projects/Laterality_Hancock2023.git
@@ -46,7 +46,7 @@ These commands should create a fresh environment the task with all its dependenc
 Alternatively, to install the dependencies for the task in your global Python environment, run the following commands in a terminal window:
 
 ```bash
-pip install https://github.com/a-hurst/klibs/releases/latest/download/klibs.tar.gz
+pip install https://github.com/a-hurst/klibs/releases/download/0.7.7b1/klibs-0.7.7b1.tar.gz
 pip install pyusb
 pip install libusb_package # Only required for 360 controller support on macOS
 ```
@@ -61,9 +61,9 @@ If you just want to test the program out for yourself and skip demographics coll
 
 #### Optional Settings
 
-This task has two possible between-subjects conditions: physical practice (PP) and motor imagery (MI).
+This task has three possible between-subjects conditions: physical practice (PP), motor imagery (MI), and a control condition (CC).
 
-To choose which condition to run, launch the experiment with the `--condition` or `-c` flag, followed by either `PP` or `MI`. For example, if you wanted to run a participant in the motor imagery condition on a computer with a 15.6-inch monitor, you would run 
+To choose which condition to run, launch the experiment with the `--condition` or `-c` flag, followed by either `PP`, `MI`, or `CC`. For example, if you wanted to run a participant in the motor imagery condition on a computer with a 15.6-inch monitor, you would run 
 
 ```
 klibs run 15.6 --condition MI
